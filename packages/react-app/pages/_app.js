@@ -7,6 +7,8 @@ import { DevUI, NetworkDisplay, ThemeSwitch } from "../components";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import Head from "next/head";
 import { ethers } from "ethers";
+import { POLLING_INTERVAL } from "../helpers/connectors";
+import Layout from "../components/Layout/Layout";
 
 function MyApp({ Component, pageProps }) {
   const prevTheme = useRef("light");
@@ -22,7 +24,7 @@ function MyApp({ Component, pageProps }) {
   function getLibrary(provider) {
     console.log("provider ", provider);
     const library = new ethers.providers.Web3Provider(provider, "any");
-    library.pollingInterval = 15000;
+    library.pollingInterval = POLLING_INTERVAL;
     return library;
   }
   return (
@@ -39,7 +41,9 @@ function MyApp({ Component, pageProps }) {
             <NetworkDisplay />
             <DevUI />
             <ThemeSwitch />
-            <Component {...pageProps} />
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
           </>
         </ThemeSwitcherProvider>
       </Web3ContextProvider>

@@ -23,13 +23,6 @@ function Home({ web3 }) {
   // console.log("number ", number ? number.toString() : "");
   return (
     <>
-      {/* Page Header start */}
-      <div className="flex flex-1 justify-between items-center">
-        <Header />
-        <div className="mr-6">
-          <Account {...web3} />
-        </div>
-      </div>
       {/* Page Header end */}
 
       {/* Main Page Content start */}

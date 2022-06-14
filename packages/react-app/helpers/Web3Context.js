@@ -38,6 +38,7 @@ export function Web3Provider({ children, ...props }) {
   // app states
   const [injectedProvider, setInjectedProvider] = useState();
   const [yourLocalBalance, setYourLocalBalance] = useState(BigNumber.from(0));
+  const [showModalLogin, setShowModalLogin] = useState(false);
   // const [address, setAddress] = useState();
 
   /// 📡 What chain are your contracts deployed to?
@@ -305,6 +306,8 @@ export function Web3Provider({ children, ...props }) {
     yourLocalBalance,
     contractConfig,
     targetNetwork,
+    showModalLogin,
+    setShowModalLogin,
   };
 
   return <Web3Context.Provider value={providerProps}>{children}</Web3Context.Provider>;
