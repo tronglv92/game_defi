@@ -34,11 +34,11 @@ export default function Balance(props) {
 
   // const [listening, setListening] = useState(false);
 
-  const balance = useBalance(props.provider, props.address);
-
+  // const balance = useBalance(props.provider, props.address);
+  const { yourLocalBalance } = props;
   let floatBalance = parseFloat("0.00");
 
-  let usingBalance = balance;
+  let usingBalance = yourLocalBalance;
 
   if (typeof props.balance !== "undefined") {
     usingBalance = props.balance;

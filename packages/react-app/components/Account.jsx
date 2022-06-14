@@ -1,3 +1,4 @@
+import { useWeb3React } from "@web3-react/core";
 import { Button } from "antd";
 import React from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
@@ -40,7 +41,6 @@ import Wallet from "./Wallet";
 */
 
 export default function Account({
-  address,
   userSigner,
   localProvider,
   mainnetProvider,
@@ -50,35 +50,38 @@ export default function Account({
   loadWeb3Modal,
   logoutOfWeb3Modal,
   blockExplorer,
+
+  yourLocalBalance,
 }) {
+  const { active, account, library, connector, activate, deactivate } = useWeb3React();
+
+  console.log("Account account ", account);
   const modalButtons = [];
-  if (web3Modal) {
-    if (web3Modal.cachedProvider) {
-      modalButtons.push(
-        <Button
-          key="logoutbutton"
-          style={{ verticalAlign: "top", marginLeft: 8, marginTop: 4 }}
-          shape="round"
-          size="large"
-          onClick={logoutOfWeb3Modal}
-        >
-          logout
-        </Button>,
-      );
-    } else {
-      modalButtons.push(
-        <Button
-          key="loginbutton"
-          style={{ verticalAlign: "top", marginLeft: 8, marginTop: 4 }}
-          shape="round"
-          size="large"
-          /* type={minimized ? "default" : "primary"}     too many people just defaulting to MM and having a bad time */
-          onClick={loadWeb3Modal}
-        >
-          connect
-        </Button>,
-      );
-    }
+  if (active) {
+    modalButtons.push(
+      <Button
+        key="logoutbutton"
+        style={{ verticalAlign: "top", marginLeft: 8, marginTop: 4 }}
+        shape="round"
+        size="large"
+        onClick={logoutOfWeb3Modal}
+      >
+        logout
+      </Button>,
+    );
+  } else {
+    modalButtons.push(
+      <Button
+        key="loginbutton"
+        style={{ verticalAlign: "top", marginLeft: 8, marginTop: 4 }}
+        shape="round"
+        size="large"
+        /* type={minimized ? "default" : "primary"}     too many people just defaulting to MM and having a bad time */
+        onClick={loadWeb3Modal}
+      >
+        connect
+      </Button>,
+    );
   }
 
   const { currentTheme } = useThemeSwitcher();
@@ -87,14 +90,14 @@ export default function Account({
     ""
   ) : (
     <span>
-      {address ? (
-        <Address address={address} ensProvider={mainnetProvider} blockExplorer={blockExplorer} />
+      {account ? (
+        <Address address={account} ensProvider={mainnetProvider} blockExplorer={blockExplorer} />
       ) : (
         "Connecting..."
       )}
-      <Balance address={address} provider={localProvider} price={price} />
+      <Balance address={account} provider={localProvider} price={price} yourLocalBalance={yourLocalBalance} />
       <Wallet
-        address={address}
+        address={account}
         provider={localProvider}
         signer={userSigner}
         ensProvider={mainnetProvider}

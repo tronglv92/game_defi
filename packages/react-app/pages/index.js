@@ -1,10 +1,26 @@
+import { useContractReader } from "eth-hooks";
 import React, { useContext } from "react";
 import { Contract, Account, Header } from "../components";
+import ExampleUI from "../components/Views/ExampleUI";
 import { Web3Consumer } from "../helpers/Web3Context";
 
 function Home({ web3 }) {
   console.log(`🗄 web3 context:`, web3);
-
+  const {
+    readContracts,
+    account,
+    userSigner,
+    mainnetProvider,
+    localProvider,
+    yourLocalBalance,
+    writeContracts,
+    price,
+    tx,
+  } = web3;
+  const purpose = useContractReader(readContracts, "YourContract", "purpose");
+  const number = useContractReader(readContracts, "YourContract", "number");
+  // console.log("purpose ", purpose);
+  // console.log("number ", number ? number.toString() : "");
   return (
     <>
       {/* Page Header start */}
@@ -30,14 +46,20 @@ function Home({ web3 }) {
           </span>
         </div>
         <div className="text-center">
-          <Contract
-            name="YourContract"
-            signer={web3.userSigner}
-            provider={web3.localProvider}
-            address={web3.address}
-            blockExplorer={web3.blockExplorer}
-            contractConfig={web3.contractConfig}
-          />
+          {userSigner && (
+            <ExampleUI
+              address={account}
+              userSigner={userSigner}
+              mainnetProvider={mainnetProvider}
+              localProvider={localProvider}
+              yourLocalBalance={yourLocalBalance}
+              price={price}
+              tx={tx}
+              writeContracts={writeContracts}
+              readContracts={readContracts}
+              purpose={purpose ? purpose : ""}
+            />
+          )}
         </div>
       </div>
     </>
