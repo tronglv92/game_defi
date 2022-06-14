@@ -50,7 +50,8 @@ export default function Account({
   loadWeb3Modal,
   logoutOfWeb3Modal,
   blockExplorer,
-
+  onConnect,
+  onLogout,
   yourLocalBalance,
 }) {
   const { active, account, library, connector, activate, deactivate } = useWeb3React();
@@ -64,7 +65,7 @@ export default function Account({
         style={{ verticalAlign: "top", marginLeft: 8, marginTop: 4 }}
         shape="round"
         size="large"
-        onClick={logoutOfWeb3Modal}
+        onClick={onLogout}
       >
         logout
       </Button>,
@@ -77,7 +78,7 @@ export default function Account({
         shape="round"
         size="large"
         /* type={minimized ? "default" : "primary"}     too many people just defaulting to MM and having a bad time */
-        onClick={loadWeb3Modal}
+        onClick={onConnect}
       >
         connect
       </Button>,

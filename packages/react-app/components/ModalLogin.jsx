@@ -3,12 +3,11 @@ import metamask from "../images/metamask.svg";
 import coinbase_wallet from "../images/coinbase_wallet.svg";
 import wallet_connect from "../images/wallet_connect.svg";
 import close from "../images/close.svg";
-import { Web3Consumer } from "../helpers/Web3Context";
+
 // displays a page header
 
 function ModalLogin(props) {
-  const { onLoginMetamask } = props.web3;
-  const { setShowModalLogin } = props;
+  const { setShowModalLogin, onLoginMetamask, onLoginWalletConnect, onLoginCoinbaseWallet } = props;
 
   return (
     <>
@@ -61,14 +60,17 @@ function ModalLogin(props) {
                 </li>
 
                 <li>
-                  <a class="flex items-center p-3 text-base font-bold text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                  <a
+                    onClick={onLoginCoinbaseWallet}
+                    class="flex items-center p-3 text-base font-bold text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
+                  >
                     <img src={coinbase_wallet.src} />
                     <span class="flex-1 ml-3 whitespace-nowrap">Coinbase Wallet</span>
                   </a>
                 </li>
                 <li>
                   <a
-                    href="#"
+                    onClick={onLoginWalletConnect}
                     class="flex items-center p-3 text-base font-bold text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
                   >
                     <img src={wallet_connect.src} />
@@ -107,4 +109,4 @@ function ModalLogin(props) {
     </>
   );
 }
-export default Web3Consumer(ModalLogin);
+export default ModalLogin;

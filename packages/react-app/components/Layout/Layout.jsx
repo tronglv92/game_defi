@@ -27,7 +27,14 @@ function Layout({ children, web3 }) {
       {children}
       {/* Modal Login */}
       {/* 0:metamask */}
-      {showModalLogin == true && <ModalLogin setShowModalLogin={setShowModalLogin} />}
+      {showModalLogin == true && (
+        <ModalLogin
+          setShowModalLogin={setShowModalLogin}
+          onLoginMetamask={() => {}}
+          onLoginWalletConnect={() => {}}
+          onLoginCoinbaseWallet={() => {}}
+        />
+      )}
     </>
   );
 }
