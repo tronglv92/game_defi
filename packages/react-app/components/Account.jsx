@@ -46,9 +46,7 @@ export default function Account({
   mainnetProvider,
   price,
   minimized,
-  web3Modal,
-  loadWeb3Modal,
-  logoutOfWeb3Modal,
+
   blockExplorer,
   onConnect,
   onLogout,

@@ -13,13 +13,13 @@ import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 // contracts
 import deployedContracts from "../contracts/hardhat_contracts.json";
 import externalContracts from "../contracts/external_contracts";
-import { injected } from "../helpers/connectors";
+import { activateInjectedProvider, injected } from "../helpers/connectors";
 import { useWeb3React } from "@web3-react/core";
 import Portis from "@portis/web3";
 import Fortmatic from "fortmatic";
 import Authereum from "authereum";
 import { getLocal, setLocal } from "./local";
-import { INJECTED_PROVIDER_ID } from "../constants/key";
+import { METAMASK_ID } from "../constants/key";
 
 const { ethers, BigNumber } = require("ethers");
 
@@ -195,40 +195,28 @@ export function Web3Provider({ children, ...props }) {
     mainnetContracts,
   ]);
 
-  const loadWeb3Modal = useCallback(async () => {
-    // const provider = await web3Modal.connect();
-    // setInjectedProvider(new ethers.providers.Web3Provider(provider));
-    // provider.on("chainChanged", chainId => {
-    //   console.log(`chain changed to ${chainId}! updating providers`);
-    //   setInjectedProvider(new ethers.providers.Web3Provider(provider));
-    // });
-    // provider.on("accountsChanged", () => {
-    //   console.log(`account changed!`);
-    //   setInjectedProvider(new ethers.providers.Web3Provider(provider));
-    // });
-    // // Subscribe to session disconnection
-    // provider.on("disconnect", (code, reason) => {
-    //   console.log(code, reason);
-    //   logoutOfWeb3Modal();
-    // });
-
+  const onLoginMetaMask = async id => {
+    console.log("onLoginMetaMask id ", id);
     try {
+      activateInjectedProvider(METAMASK_ID);
       await activate(injected);
-
       console.log("library", library);
-      setLocal(INJECTED_PROVIDER_ID, true);
+      setLocal(METAMASK_ID, true);
+
       // localStorage.setItem("isWalletConnected", true);
     } catch (ex) {
       console.log(ex);
+      
     }
-  }, [setInjectedProvider]);
+    setShowModalLogin(false);
+  };
   const logoutOfWeb3Modal = async () => {
     // await web3Modal.clearCachedProvider();
     // if (injectedProvider && injectedProvider.provider && typeof injectedProvider.provider.disconnect == "function") {
     //   await injectedProvider.provider.disconnect();
     // }
     deactivate();
-    setLocal(INJECTED_PROVIDER_ID, false);
+    setLocal(METAMASK_ID, false);
     // setTimeout(() => {
     //   window.location.reload();
     // }, 1);
@@ -236,11 +224,11 @@ export function Web3Provider({ children, ...props }) {
 
   useEffect(() => {
     const connectWalletOnPageLoad = async () => {
-      console.log("getLocal(INJECTED_PROVIDER_ID) ", getLocal(INJECTED_PROVIDER_ID));
-      if (getLocal(INJECTED_PROVIDER_ID) == true) {
+      console.log("getLocal(METAMASK_ID) ", getLocal(METAMASK_ID));
+      if (getLocal(METAMASK_ID) == true) {
         try {
           await activate(injected);
-          setLocal(INJECTED_PROVIDER_ID, true);
+          setLocal(METAMASK_ID, true);
         } catch (ex) {
           console.log(ex);
         }
@@ -301,7 +289,8 @@ export function Web3Provider({ children, ...props }) {
     faucetHint,
 
     faucetAvailable,
-    loadWeb3Modal,
+
+    onLoginMetaMask,
     logoutOfWeb3Modal,
     yourLocalBalance,
     contractConfig,
