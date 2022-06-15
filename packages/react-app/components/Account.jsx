@@ -54,7 +54,6 @@ export default function Account({
 }) {
   const { active, account, library, connector, activate, deactivate } = useWeb3React();
 
-  console.log("Account account ", account);
   const modalButtons = [];
   if (active) {
     modalButtons.push(

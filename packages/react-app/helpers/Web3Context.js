@@ -1,26 +1,26 @@
 import WalletConnectProvider from "@walletconnect/web3-provider";
 //import Torus from "@toruslabs/torus-embed"
 import WalletLink from "walletlink";
-import { Alert, Button } from "antd";
+import { Alert, Button, notification } from "antd";
 import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState, useRef, useMemo } from "react";
 
 import { INFURA_ID, NETWORKS, ALCHEMY_KEY } from "../constants";
 import { Transactor } from "../helpers";
-import { useBalance, useContractLoader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
+import { useContractLoader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 
 // contracts
 import deployedContracts from "../contracts/hardhat_contracts.json";
 import externalContracts from "../contracts/external_contracts";
-import { activateInjectedProvider, injected } from "../helpers/connectors";
+import { activateInjectedProvider, getErrorMessage, injected } from "../helpers/connectors";
 import { useWeb3React } from "@web3-react/core";
-import Portis from "@portis/web3";
-import Fortmatic from "fortmatic";
-import Authereum from "authereum";
+
 import { getLocal, setLocal } from "./local";
 import { AUTH_LOCAL_ID, METAMASK_ID } from "../constants/key";
 import { useEagerConnect, useInactiveListener } from "../hooks/ConnecHook";
+import { useBalance } from "../hooks/useBalance";
+import lib from "@ant-design/icons";
 const { ethers, BigNumber } = require("ethers");
 
 // create our app context
@@ -134,7 +134,9 @@ export function Web3Provider({ children, ...props }) {
   // const yourLocalBalance = useBalance(localProvider, account);
 
   // Just plug in different 🛰 providers to get your balance on different chains:
-  const yourMainnetBalance = useBalance(mainnetProvider, account);
+
+  const yourMainnetBalance = "0";
+  // const yourMainnetBalance = useBalance(mainnetProvider, account);
 
   const contractConfig = { deployedContracts: deployedContracts || {}, externalContracts: externalContracts || {} };
 
@@ -154,6 +156,9 @@ export function Web3Provider({ children, ...props }) {
     console.log(`⛓ A new mainnet block is here: ${mainnetProvider._lastBlockNumber}`);
   });
 
+  useOnBlock(localProvider, () => {
+    getBalance();
+  });
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
   console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
@@ -197,16 +202,22 @@ export function Web3Provider({ children, ...props }) {
 
   const onLogin = async value => {
     console.log("onLoginMetaMask id ", value.id);
+
     try {
       activateInjectedProvider(value.id);
-      await activate(value.connector);
+      await activate(value.connector, undefined, true);
       console.log("library", library);
       const data = { id: value.id, name: value.name };
       setLocal(AUTH_LOCAL_ID, data);
-
       // localStorage.setItem("isWalletConnected", true);
     } catch (ex) {
-      console.log(ex);
+      const msgError = getErrorMessage(ex);
+      console.log("msgError ", msgError.toString());
+      notification.error({
+        message: "Login Error",
+        description: msgError,
+      });
+      setLocal(AUTH_LOCAL_ID, null);
     }
     setShowModalLogin(false);
   };
@@ -224,20 +235,6 @@ export function Web3Provider({ children, ...props }) {
   const triedEager = useEagerConnect();
 
   useInactiveListener(!triedEager);
-  // useEffect(() => {
-  //   const connectWalletOnPageLoad = async () => {
-  //     console.log("getLocal(METAMASK_ID) ", getLocal(METAMASK_ID));
-  //     if (getLocal(METAMASK_ID) == true) {
-  //       try {
-  //         await activate(injected);
-  //         setLocal(METAMASK_ID, true);
-  //       } catch (ex) {
-  //         console.log(ex);
-  //       }
-  //     }
-  //   };
-  //   connectWalletOnPageLoad();
-  // }, []);
 
   let faucetHint = "";
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;

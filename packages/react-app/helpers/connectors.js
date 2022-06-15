@@ -1,10 +1,18 @@
-import { InjectedConnector } from "@web3-react/injected-connector";
+import {
+  InjectedConnector,
+  NoEthereumProviderError,
+  UserRejectedRequestError as UserRejectedRequestErrorInjected,
+} from "@web3-react/injected-connector";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import { WalletLinkConnector } from "@web3-react/walletlink-connector";
 import { WalletId } from "../constants/key";
 import metamask from "../images/metamask.svg";
 import coinbase_wallet from "../images/coinbase_wallet.svg";
 import wallet_connect from "../images/wallet_connect.svg";
+import { UnsupportedChainIdError } from "@web3-react/core";
+
+import { UserRejectedRequestError as UserRejectedRequestErrorWalletConnect } from "@web3-react/walletconnect-connector";
+import { UserRejectedRequestError as UserRejectedRequestErrorFrame } from "@web3-react/frame-connector";
 export const POLLING_INTERVAL = 12000;
 const RPC_URLS = {
   1: "https://mainnet.infura.io/v3/e8cb245fc6964448938cc0b63b5abfdd",
@@ -69,5 +77,21 @@ export function activateInjectedProvider(providerName) {
 
   if (provider) {
     ethereum.setSelectedProvider(provider);
+  }
+}
+export function getErrorMessage(error) {
+  if (error instanceof NoEthereumProviderError) {
+    return "No Ethereum browser extension detected, install MetaMask on desktop or visit from a dApp browser on mobile.";
+  } else if (error instanceof UnsupportedChainIdError) {
+    return "You're connected to an unsupported network.";
+  } else if (
+    error instanceof UserRejectedRequestErrorInjected ||
+    error instanceof UserRejectedRequestErrorWalletConnect ||
+    error instanceof UserRejectedRequestErrorFrame
+  ) {
+    return "Please authorize this website to access your Ethereum account.";
+  } else {
+    console.error(error);
+    return error.message;
   }
 }

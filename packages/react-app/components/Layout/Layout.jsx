@@ -7,7 +7,7 @@ import ModalLogin from "../ModalLogin";
 
 function Layout({ children, web3 }) {
   const { logoutOfWeb3Modal, showModalLogin, setShowModalLogin, onLogin } = web3;
-  console.log("Layout web3 ", web3);
+
   return (
     <>
       {/* Page Header start */}
