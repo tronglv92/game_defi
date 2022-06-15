@@ -19,8 +19,8 @@ import Portis from "@portis/web3";
 import Fortmatic from "fortmatic";
 import Authereum from "authereum";
 import { getLocal, setLocal } from "./local";
-import { METAMASK_ID } from "../constants/key";
-
+import { AUTH_LOCAL_ID, METAMASK_ID } from "../constants/key";
+import { useEagerConnect, useInactiveListener } from "../hooks/ConnecHook";
 const { ethers, BigNumber } = require("ethers");
 
 // create our app context
@@ -34,9 +34,9 @@ export function Web3Provider({ children, ...props }) {
   }
 
   const { network = "localhost", DEBUG = true, NETWORKCHECK = true } = props;
-  const { active, account, library, connector, activate, deactivate } = useWeb3React();
+  const { active, account, library, connector, chainId, activate, deactivate } = useWeb3React();
   // app states
-  const [injectedProvider, setInjectedProvider] = useState();
+  // const [injectedProvider, setInjectedProvider] = useState();
   const [yourLocalBalance, setYourLocalBalance] = useState(BigNumber.from(0));
   const [showModalLogin, setShowModalLogin] = useState(false);
   // const [address, setAddress] = useState();
@@ -88,7 +88,7 @@ export function Web3Provider({ children, ...props }) {
   /* 🔥 This hook will get the price of Gas from ⛽️ EtherGasStation */
   const gasPrice = useGasPrice(targetNetwork, "fast");
   // Use your injected provider from 🦊 Metamask or if you don't have it then instantly generate a 🔥 burner wallet.
-  const userProviderAndSigner = useUserProviderAndSigner(injectedProvider, localProvider);
+  const userProviderAndSigner = useUserProviderAndSigner(library, localProvider);
   const userSigner = userProviderAndSigner.signer;
 
   // useEffect(() => {
@@ -101,22 +101,22 @@ export function Web3Provider({ children, ...props }) {
   //   getAddress();
   // }, [userSigner]);
 
-  useEffect(() => {
-    console.log("Web3Context library ", library);
-    if (library) {
-      setInjectedProvider(library);
-    }
-  }, [library]);
+  // useEffect(() => {
+  //   console.log("Web3Context library ", library);
+  //   setInjectedProvider(library);
+  // }, [library]);
   const getBalance = async () => {
-    if (localProvider && account) {
-      const balanceAccount = await localProvider.getBalance(account);
+    if (library && account) {
+      const balanceAccount = await library.getBalance(account);
       console.log("balanceAccount ", balanceAccount);
       setYourLocalBalance(balanceAccount);
+    } else {
+      setYourLocalBalance(BigNumber.from(0));
     }
   };
   useEffect(() => {
     getBalance();
-  }, [localProvider, account]);
+  }, [library, account, chainId]);
   // You can warn the user if you would like them to be on a specific network
   const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
   const selectedChainId =
@@ -195,18 +195,18 @@ export function Web3Provider({ children, ...props }) {
     mainnetContracts,
   ]);
 
-  const onLoginMetaMask = async id => {
-    console.log("onLoginMetaMask id ", id);
+  const onLogin = async value => {
+    console.log("onLoginMetaMask id ", value.id);
     try {
-      activateInjectedProvider(METAMASK_ID);
-      await activate(injected);
+      activateInjectedProvider(value.id);
+      await activate(value.connector);
       console.log("library", library);
-      setLocal(METAMASK_ID, true);
+      const data = { id: value.id, name: value.name };
+      setLocal(AUTH_LOCAL_ID, data);
 
       // localStorage.setItem("isWalletConnected", true);
     } catch (ex) {
       console.log(ex);
-      
     }
     setShowModalLogin(false);
   };
@@ -216,26 +216,28 @@ export function Web3Provider({ children, ...props }) {
     //   await injectedProvider.provider.disconnect();
     // }
     deactivate();
-    setLocal(METAMASK_ID, false);
+    setLocal(AUTH_LOCAL_ID, null);
     // setTimeout(() => {
     //   window.location.reload();
     // }, 1);
   };
+  const triedEager = useEagerConnect();
 
-  useEffect(() => {
-    const connectWalletOnPageLoad = async () => {
-      console.log("getLocal(METAMASK_ID) ", getLocal(METAMASK_ID));
-      if (getLocal(METAMASK_ID) == true) {
-        try {
-          await activate(injected);
-          setLocal(METAMASK_ID, true);
-        } catch (ex) {
-          console.log(ex);
-        }
-      }
-    };
-    connectWalletOnPageLoad();
-  }, []);
+  useInactiveListener(!triedEager);
+  // useEffect(() => {
+  //   const connectWalletOnPageLoad = async () => {
+  //     console.log("getLocal(METAMASK_ID) ", getLocal(METAMASK_ID));
+  //     if (getLocal(METAMASK_ID) == true) {
+  //       try {
+  //         await activate(injected);
+  //         setLocal(METAMASK_ID, true);
+  //       } catch (ex) {
+  //         console.log(ex);
+  //       }
+  //     }
+  //   };
+  //   connectWalletOnPageLoad();
+  // }, []);
 
   let faucetHint = "";
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
@@ -290,7 +292,7 @@ export function Web3Provider({ children, ...props }) {
 
     faucetAvailable,
 
-    onLoginMetaMask,
+    onLogin,
     logoutOfWeb3Modal,
     yourLocalBalance,
     contractConfig,

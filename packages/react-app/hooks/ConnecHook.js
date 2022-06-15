@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useWeb3React } from "@web3-react/core";
 
-import { injected } from "./connectors";
-import { INJECTED_PROVIDER_ID } from "../constants/key";
+import { activateInjectedProvider, injected } from "../helpers/connectors";
+import { AUTH_LOCAL_ID, INJECTED_PROVIDER_ID, METAMASK_ID } from "../constants/key";
 import { getLocal, setLocal } from "../helpers/local";
 
 export function useEagerConnect() {
@@ -27,11 +27,13 @@ export function useEagerConnect() {
   }
   useEffect(() => {
     const connectWalletOnPageLoad = async () => {
-      console.log("getLocal(INJECTED_PROVIDER_ID) ", getLocal(INJECTED_PROVIDER_ID));
-      if (getLocal(INJECTED_PROVIDER_ID) == true) {
+      console.log("getLocal(INJECTED_PROVIDER_ID) ", getLocal(AUTH_LOCAL_ID));
+      const auth = getLocal(AUTH_LOCAL_ID);
+      if (auth) {
         try {
+          activateInjectedProvider(auth.id);
           await activate(injected);
-          setLocal(INJECTED_PROVIDER_ID, true);
+          setLocal(AUTH_LOCAL_ID, auth);
         } catch (err) {
           console.log(err);
           const messageError = getErrorMessage(err);

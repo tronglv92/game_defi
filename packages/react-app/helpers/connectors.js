@@ -1,7 +1,10 @@
 import { InjectedConnector } from "@web3-react/injected-connector";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import { WalletLinkConnector } from "@web3-react/walletlink-connector";
-import { COINBASE_ID, METAMASK_ID } from "../constants/key";
+import { WalletId } from "../constants/key";
+import metamask from "../images/metamask.svg";
+import coinbase_wallet from "../images/coinbase_wallet.svg";
+import wallet_connect from "../images/wallet_connect.svg";
 export const POLLING_INTERVAL = 12000;
 const RPC_URLS = {
   1: "https://mainnet.infura.io/v3/e8cb245fc6964448938cc0b63b5abfdd",
@@ -26,8 +29,27 @@ export function resetWalletConnector(connector) {
 export const walletlink = new WalletLinkConnector({
   url: RPC_URLS[1],
   appName: "game defi",
-  supportedChainIds: [1, 3, 4, 5, 42, 10, 137, 69, 420, 80001],
+  supportedChainIds: [1, 3, 4, 5, 42, 10, 137, 69, 420, 80001, 31337],
 });
+
+export const connectorsByName = {
+  METAMASK: { connector: injected, popular: true, svg: metamask.src, name: "Metamask", id: WalletId.Metamask },
+  COINBASE: {
+    connector: walletlink,
+    popular: false,
+    svg: coinbase_wallet.src,
+    name: "Coinbase Wallet",
+    id: WalletId.Coinbase,
+  },
+
+  WALLET: {
+    connector: walletconnect,
+    popular: false,
+    svg: wallet_connect.src,
+    name: "WalletConnect",
+    id: WalletId.WalletLink,
+  },
+};
 export function activateInjectedProvider(providerName) {
   const { ethereum } = window;
 
@@ -37,10 +59,10 @@ export function activateInjectedProvider(providerName) {
 
   let provider;
   switch (providerName) {
-    case COINBASE_ID:
+    case WalletId.Coinbase:
       provider = ethereum.providers.find(({ isCoinbaseWallet }) => isCoinbaseWallet);
       break;
-    case METAMASK_ID:
+    case WalletId.Metamask:
       provider = ethereum.providers.find(({ isMetaMask }) => isMetaMask);
       break;
   }

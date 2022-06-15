@@ -3,11 +3,12 @@ import metamask from "../images/metamask.svg";
 import coinbase_wallet from "../images/coinbase_wallet.svg";
 import wallet_connect from "../images/wallet_connect.svg";
 import close from "../images/close.svg";
+import { connectorsByName } from "../helpers/connectors";
 
 // displays a page header
 
 function ModalLogin(props) {
-  const { setShowModalLogin, onLoginMetamask, onLoginWalletConnect, onLoginCoinbaseWallet } = props;
+  const { setShowModalLogin, onLogin } = props;
 
   return (
     <>
@@ -41,50 +42,39 @@ function ModalLogin(props) {
             </div>
             {/*body*/}
             <div className="relative p-6 ">
-              <p class="text-sm font-normal text-gray-500 dark:text-gray-400">
+              <p className="text-sm font-normal text-gray-500 dark:text-gray-400">
                 Connect with one of our available wallet providers or create a new one.
               </p>
-              <ul class="my-4 space-y-3">
-                <li>
-                  <a
-                    onClick={onLoginMetamask}
-                    class="flex  items-center p-3 text-base font-bold text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
-                  >
-                    <img src={metamask.src} />
+              <ul className="my-4 space-y-3">
+                {Object.entries(connectorsByName).map(([key, value]) => {
+                  return (
+                    <li key={key}>
+                      <a
+                        onClick={() => {
+                          onLogin(value);
+                        }}
+                        className="flex  items-center p-3 text-base font-bold text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
+                      >
+                        <img src={value.svg} />
 
-                    <span class="flex-1 ml-3 whitespace-nowrap">MetaMask</span>
-                    <span class="inline-flex items-center justify-center px-2 py-0.5 ml-3 text-xs font-medium text-gray-500 bg-gray-200 rounded dark:bg-gray-700 dark:text-gray-400">
-                      Popular
-                    </span>
-                  </a>
-                </li>
-
-                <li>
-                  <a
-                    onClick={onLoginCoinbaseWallet}
-                    class="flex items-center p-3 text-base font-bold text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
-                  >
-                    <img src={coinbase_wallet.src} />
-                    <span class="flex-1 ml-3 whitespace-nowrap">Coinbase Wallet</span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    onClick={onLoginWalletConnect}
-                    class="flex items-center p-3 text-base font-bold text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
-                  >
-                    <img src={wallet_connect.src} />
-                    <span class="flex-1 ml-3 whitespace-nowrap">WalletConnect</span>
-                  </a>
-                </li>
+                        <span className="flex-1 ml-3 whitespace-nowrap">{value.name}</span>
+                        {value.popular == true && (
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 ml-3 text-xs font-medium text-gray-500 bg-gray-200 rounded dark:bg-gray-700 dark:text-gray-400">
+                            Popular
+                          </span>
+                        )}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
               <div>
                 <a
                   href="#"
-                  class="inline-flex items-center text-xs font-normal text-gray-500 hover:underline dark:text-gray-400"
+                  className="inline-flex items-center text-xs font-normal text-gray-500 hover:underline dark:text-gray-400"
                 >
                   <svg
-                    class="mr-2 w-3 h-3"
+                    className="mr-2 w-3 h-3"
                     aria-hidden="true"
                     focusable="false"
                     data-prefix="far"
