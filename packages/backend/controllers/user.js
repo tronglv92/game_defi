@@ -1,9 +1,8 @@
-const express = require("express");
-
 const User = require("../models/user.model");
 
 exports.find = (req, res, next) => {
   // If a query string ?publicAddress=... is given, then filter results
+  console.log("vao trong nay 1");
   const whereClause =
     req.query && req.query.publicAddress
       ? {
@@ -27,7 +26,9 @@ exports.get = (req, res, next) => {
     .then((user) => res.json(user))
     .catch(next);
 };
-exports.create = (req, res, next) => {
+exports.createUser = (req, res, next) => {
+  console.log("vao trong nay 2");
+  console.log("req.body ", req.body);
   return User.create(req.body)
     .then((user) => res.json(user))
     .catch(next);

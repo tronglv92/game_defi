@@ -1,7 +1,7 @@
 import { useWeb3React } from "@web3-react/core";
 import { Button } from "antd";
 import React from "react";
-import { useThemeSwitcher } from "react-css-theme-switcher";
+
 import Address from "./Address";
 import Balance from "./Balance";
 import Wallet from "./Wallet";
@@ -46,16 +46,14 @@ export default function Account({
   mainnetProvider,
   price,
   minimized,
-
+  yourAccount,
   blockExplorer,
   onConnect,
   onLogout,
   yourLocalBalance,
 }) {
-  const { active, account, library, connector, activate, deactivate } = useWeb3React();
-
   const modalButtons = [];
-  if (active) {
+  if (yourAccount) {
     modalButtons.push(
       <Button
         key="logoutbutton"
@@ -82,25 +80,23 @@ export default function Account({
     );
   }
 
-  const { currentTheme } = useThemeSwitcher();
-
   const display = minimized ? (
     ""
   ) : (
     <span>
-      {account ? (
-        <Address address={account} ensProvider={mainnetProvider} blockExplorer={blockExplorer} />
+      {yourAccount ? (
+        <Address address={yourAccount} ensProvider={mainnetProvider} blockExplorer={blockExplorer} />
       ) : (
         "Connecting..."
       )}
-      <Balance address={account} provider={localProvider} price={price} yourLocalBalance={yourLocalBalance} />
+      <Balance address={yourAccount} provider={localProvider} price={price} yourLocalBalance={yourLocalBalance} />
       <Wallet
-        address={account}
+        address={yourAccount}
         provider={localProvider}
         signer={userSigner}
         ensProvider={mainnetProvider}
         price={price}
-        color={currentTheme === "light" ? "#1890ff" : "#2caad9"}
+        color={"#1890ff"}
       />
     </span>
   );

@@ -5,6 +5,7 @@ export const WalletId = {
   WalletLink: 2,
 };
 export const AUTH_LOCAL_ID = "auth_local_id";
+export const LS_KEY = "login-with-metamask:auth";
 export const METAMASK_ID = "metamask_connect";
 export const COINBASE_ID = "coinbase_connect";
 export const WALLET_ID = "wallet_connect";

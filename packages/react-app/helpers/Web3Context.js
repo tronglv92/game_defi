@@ -5,7 +5,7 @@ import { Alert, Button, notification } from "antd";
 import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState, useRef, useMemo } from "react";
 
-import { INFURA_ID, NETWORKS, ALCHEMY_KEY } from "../constants";
+import { INFURA_ID, NETWORKS, ALCHEMY_KEY, NETWORK } from "../constants";
 import { Transactor } from "../helpers";
 import { useContractLoader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
@@ -17,7 +17,7 @@ import { activateInjectedProvider, getErrorMessage, injected } from "../helpers/
 import { useWeb3React } from "@web3-react/core";
 
 import { getLocal, setLocal } from "./local";
-import { AUTH_LOCAL_ID, METAMASK_ID } from "../constants/key";
+import { AUTH_LOCAL_ID, LS_KEY, METAMASK_ID } from "../constants/key";
 import { useEagerConnect, useInactiveListener } from "../hooks/ConnecHook";
 import { useBalance } from "../hooks/useBalance";
 import lib from "@ant-design/icons";
@@ -38,7 +38,10 @@ export function Web3Provider({ children, ...props }) {
   // app states
   // const [injectedProvider, setInjectedProvider] = useState();
   const [yourLocalBalance, setYourLocalBalance] = useState(BigNumber.from(0));
+  const [yourAccount, setYourAccount] = useState();
   const [showModalLogin, setShowModalLogin] = useState(false);
+  const [showModalDisplayNetWork, setShowModalDisplayNetWork] = useState(false);
+  const [state, setState] = useState({});
   // const [address, setAddress] = useState();
 
   /// 📡 What chain are your contracts deployed to?
@@ -106,17 +109,152 @@ export function Web3Provider({ children, ...props }) {
   //   setInjectedProvider(library);
   // }, [library]);
   const getBalance = async () => {
-    if (library && account) {
-      const balanceAccount = await library.getBalance(account);
-      console.log("balanceAccount ", balanceAccount);
+    if (library && yourAccount) {
+      const balanceAccount = await library.getBalance(yourAccount);
+
       setYourLocalBalance(balanceAccount);
     } else {
       setYourLocalBalance(BigNumber.from(0));
     }
   };
+  const isNetworkSelected = chainId => {
+    console.log("NETWORKS[network].chainId ", NETWORKS[network].chainId);
+    return chainId == NETWORKS[network].chainId;
+  };
+
   useEffect(() => {
-    getBalance();
-  }, [library, account, chainId]);
+    if (isNetworkSelected(chainId)) getBalance();
+  }, [library, yourAccount, chainId]);
+
+  useEffect(() => {
+    // logged in and when change network log out
+    if (chainId && state.auth && !isNetworkSelected(chainId)) {
+      console.log("vao trong nay 4");
+      deactivate();
+    }
+  }, [chainId]);
+  const handleAuthenticate = ({ publicAddress, signature }) => {
+    return fetch(`${process.env.REACT_APP_BACKEND_URL}/auth`, {
+      body: JSON.stringify({ publicAddress, signature }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    }).then(response => response.json());
+  };
+  const handleSignMessage = async ({ publicAddress, nonce }) => {
+    try {
+      const signature = await library.send("personal_sign", [
+        `I am signing my one-time nonce: ${nonce}`,
+        publicAddress,
+      ]);
+
+      return { publicAddress, signature };
+    } catch (err) {
+      throw new Error("You need to sign the message to be able to log in.");
+    }
+  };
+  const handleSignup = publicAddress => {
+    console.log("JSON.stringify({ publicAddress }) ", JSON.stringify({ publicAddress }));
+    return fetch(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+      body: JSON.stringify({ publicAddress }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    }).then(response => response.json());
+  };
+
+  const signatureLogin = async () => {
+    console.log("signatureLogin account ", account);
+    if (account) {
+      setYourAccount(null);
+      const publicAddress = account.toLowerCase();
+      console.log("signatureLogin account ", publicAddress);
+      console.log("process.env.REACT_APP_BACKEND_URL ", process.env.REACT_APP_BACKEND_URL);
+      try {
+        const users = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users?publicAddress=${publicAddress}`).then(
+          response => response.json(),
+        );
+        // If yes, retrieve it. If no, create it.
+        let user;
+        if (users.length > 0) {
+          user = users[0];
+        } else {
+          user = await handleSignup(publicAddress);
+          console.log("signatureLogin handleSignup data ", user);
+        }
+        const resultSign = await handleSignMessage(user);
+        console.log("resultSign ", resultSign);
+        const auth = await handleAuthenticate(resultSign);
+        auth.publicAddress = publicAddress;
+
+        setLocal(LS_KEY, auth);
+        setState({ auth });
+        setYourAccount(account);
+      } catch (ex) {
+        console.log("signatureLogin ex", ex);
+        console.log("vao trong nay 5");
+        deactivate();
+        notification.error({
+          message: "Login Error",
+          description: ex.message,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    const ls = getLocal(LS_KEY);
+    const auth = ls;
+
+    setState({ auth });
+  }, []);
+
+  const loginCryto = chainId => {
+    if (isNetworkSelected(chainId)) {
+      signatureLogin();
+    } else {
+      // notification.error({ description: "Wrong network" });
+      // deactivate();
+      setShowModalDisplayNetWork(true);
+    }
+  };
+
+  // Change Account request user sign
+  useEffect(() => {
+    console.log("Web3Context chainId ", chainId);
+    console.log("Web3Context account ", account);
+    if (account) {
+      // User logged in, check account and auth in local is same
+      if (state.auth) {
+        let publicAddress = state.auth.publicAddress;
+        console.log("publicAddress ", publicAddress);
+        console.log("publicAddress != account.toLocaleLowerCase() ", publicAddress != account.toLocaleLowerCase());
+        if (publicAddress && publicAddress != account.toLocaleLowerCase()) {
+          console.log("Vao trong 1");
+
+          loginCryto(chainId);
+        }
+      }
+      // User just logged in after logout or fisttime
+      else {
+        console.log("Vao trong 2");
+        loginCryto(chainId);
+      }
+    }
+    //Logout -> account null
+    else {
+      clearAccount();
+    }
+  }, [account, chainId]);
+
+  const clearAccount = () => {
+    setLocal(LS_KEY, null);
+    setYourAccount(null);
+    setYourLocalBalance(0);
+    setState({ auth: null });
+  };
   // You can warn the user if you would like them to be on a specific network
   const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
   const selectedChainId =
@@ -202,22 +340,19 @@ export function Web3Provider({ children, ...props }) {
 
   const onLogin = async value => {
     console.log("onLoginMetaMask id ", value.id);
-
     try {
       activateInjectedProvider(value.id);
       await activate(value.connector, undefined, true);
-      console.log("library", library);
-      const data = { id: value.id, name: value.name };
-      setLocal(AUTH_LOCAL_ID, data);
+
       // localStorage.setItem("isWalletConnected", true);
     } catch (ex) {
       const msgError = getErrorMessage(ex);
-      console.log("msgError ", msgError.toString());
+
       notification.error({
         message: "Login Error",
         description: msgError,
       });
-      setLocal(AUTH_LOCAL_ID, null);
+      setLocal(LS_KEY, null);
     }
     setShowModalLogin(false);
   };
@@ -226,15 +361,12 @@ export function Web3Provider({ children, ...props }) {
     // if (injectedProvider && injectedProvider.provider && typeof injectedProvider.provider.disconnect == "function") {
     //   await injectedProvider.provider.disconnect();
     // }
+    console.log("vao trong nay 6");
     deactivate();
-    setLocal(AUTH_LOCAL_ID, null);
-    // setTimeout(() => {
-    //   window.location.reload();
-    // }, 1);
   };
-  const triedEager = useEagerConnect();
+  // const triedEager = useEagerConnect();
 
-  useInactiveListener(!triedEager);
+  // useInactiveListener(!triedEager, network);
 
   let faucetHint = "";
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
@@ -283,12 +415,12 @@ export function Web3Provider({ children, ...props }) {
     writeContracts,
     mainnetProvider,
     yourMainnetBalance,
-    account,
+
     blockExplorer,
     faucetHint,
 
     faucetAvailable,
-
+    library,
     onLogin,
     logoutOfWeb3Modal,
     yourLocalBalance,
@@ -296,6 +428,10 @@ export function Web3Provider({ children, ...props }) {
     targetNetwork,
     showModalLogin,
     setShowModalLogin,
+    showModalDisplayNetWork,
+    setShowModalDisplayNetWork,
+    yourAccount,
+    loginCryto,
   };
 
   return <Web3Context.Provider value={providerProps}>{children}</Web3Context.Provider>;

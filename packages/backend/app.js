@@ -7,13 +7,14 @@ const app = express();
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Middlewares
 app.use(cors());
 
 app.use("/auth", authRoutes);
-app.use("/user", userRoutes);
+app.use("/users", userRoutes);
 // Mount REST on /api
 sequelize
   // .sync({ force: true })

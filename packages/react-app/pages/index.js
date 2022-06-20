@@ -5,10 +5,10 @@ import ExampleUI from "../components/Views/ExampleUI";
 import { Web3Consumer } from "../helpers/Web3Context";
 
 function Home({ web3 }) {
-  console.log(`🗄 web3 context:`, web3);
+  console.log("web3 ", web3);
   const {
     readContracts,
-    account,
+    yourAccount,
     userSigner,
     mainnetProvider,
     localProvider,
@@ -41,7 +41,7 @@ function Home({ web3 }) {
         <div className="text-center">
           {userSigner && (
             <ExampleUI
-              address={account}
+              address={yourAccount}
               userSigner={userSigner}
               mainnetProvider={mainnetProvider}
               localProvider={localProvider}

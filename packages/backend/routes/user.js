@@ -3,17 +3,18 @@ const { expressjwt: jwt } = require("express-jwt");
 const { config } = require("../config");
 const controller = require("../controllers/user");
 
-userRouter = express.Router();
+const userRouter = express.Router();
 
 /** GET /api/users */
-userRouter.route("/").get(controller.find);
 
+userRouter.get("/", controller.find);
 /** GET /api/users/:userId */
 /** Authenticated route */
 userRouter.route("/:userId").get(jwt(config), controller.get);
 
-/** POST /api/users */
-userRouter.route("/").post(controller.create);
+/** POST /users */
+
+userRouter.post("/", controller.createUser);
 
 /** PATCH /api/users/:userId */
 /** Authenticated route */

@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { Web3Provider as Web3ContextProvider } from "../helpers/Web3Context";
 import { Web3ReactProvider } from "@web3-react/core";
 import { DevUI, NetworkDisplay, ThemeSwitch } from "../components";
-import { ThemeSwitcherProvider } from "react-css-theme-switcher";
+import { ThemeProvider } from "next-themes";
 import Head from "next/head";
 import { ethers } from "ethers";
 import { POLLING_INTERVAL } from "../helpers/connectors";
@@ -20,6 +20,7 @@ function MyApp({ Component, pageProps }) {
 
   useEffect(() => {
     prevTheme.current = window.localStorage.getItem("theme");
+    console.log("useEffect DB_USER ", process.env.DB_USER);
   }, []);
   function getLibrary(provider) {
     console.log("provider ", provider);
@@ -30,7 +31,7 @@ function MyApp({ Component, pageProps }) {
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
       <Web3ContextProvider network="localhost">
-        <ThemeSwitcherProvider themeMap={themes} defaultTheme={prevTheme.current}>
+        <ThemeProvider attribute="class">
           <>
             <Head>
               <link
@@ -40,12 +41,12 @@ function MyApp({ Component, pageProps }) {
             </Head>
             <NetworkDisplay />
             <DevUI />
-            <ThemeSwitch />
+
             <Layout>
               <Component {...pageProps} />
             </Layout>
           </>
-        </ThemeSwitcherProvider>
+        </ThemeProvider>
       </Web3ContextProvider>
     </Web3ReactProvider>
   );
