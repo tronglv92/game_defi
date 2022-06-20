@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { WalletId } from "../../constants/key";
+import { activateInjectedProvider } from "../../helpers/connectors";
 
 import { Web3Consumer } from "../../helpers/Web3Context";
 import Account from "../Account";
@@ -17,7 +19,16 @@ function Layout({ children, web3 }) {
     targetNetwork,
     loginCryto,
   } = web3;
+  const checkNetwork = async () => {
+    if (window.ethereum) {
+      const currentChainId = await window.ethereum.request({
+        method: "eth_chainId",
+      });
 
+      // return true if network id is the same
+      console.log("currentChainId ", currentChainId);
+    }
+  };
   return (
     <>
       {/* Page Header start */}
@@ -41,16 +52,19 @@ function Layout({ children, web3 }) {
       {showModalLogin == true && (
         <ModalLogin
           setShowModalLogin={setShowModalLogin}
-          onLogin={value => {
-            console.log("ModalLogin value ", value);
-            onLogin(value);
+          onLogin={wallet => {
+            console.log("ModalLogin wallet ", wallet);
+            onLogin(wallet);
           }}
         />
       )}
       {showModalDisplayNetWork == true && (
         <ModalNetworkDisplay
           onChangeNetwork={async () => {
+            checkNetwork();
+            // console.log("targetNetwork ", targetNetwork);
             const ethereum = window.ethereum;
+
             const data = [
               {
                 chainId: "0x" + targetNetwork.chainId.toString(16),

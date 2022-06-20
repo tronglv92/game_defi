@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useWeb3React } from "@web3-react/core";
 
-import { activateInjectedProvider, getErrorMessage, injected } from "../helpers/connectors";
+import { activateInjectedProvider, getErrorMessage, getWalletById, injected } from "../helpers/connectors";
 import { AUTH_LOCAL_ID, INJECTED_PROVIDER_ID, LS_KEY, METAMASK_ID } from "../constants/key";
 import { getLocal, setLocal } from "../helpers/local";
 import { notification } from "antd";
@@ -14,26 +14,37 @@ export function useEagerConnect() {
 
   useEffect(() => {
     const connectWalletOnPageLoad = async () => {
-      console.log("getLocal(INJECTED_PROVIDER_ID) ", getLocal(LS_KEY));
-      // const auth = getLocal(LS_KEY);
-      // if (auth) {
-      //   try {
-      //     activateInjectedProvider(auth.id);
-      //     await activate(injected, undefined, true);
-      //     setLocal(AUTH_LOCAL_ID, auth);
-      //   } catch (err) {
-      //     console.log("connectWalletOnPageLoad err", err);
-      //     const messageError = getErrorMessage(err);
-      //     notification.error({
-      //       message: "Login Error",
-      //       description: messageError,
-      //     });
-      //     console.log(messageError);
-      //     setTried(true);
-      //   }
-      // } else {
-      //   setTried(true);
-      // }
+      const auth = getLocal(LS_KEY);
+      console.log("connectWalletOnPageLoad auth ", auth);
+      if (auth) {
+        const { walletId } = auth;
+        console.log("connectWalletOnPageLoad walletId ", walletId);
+        if (walletId != null) {
+          const wallet = getWalletById(walletId);
+          console.log("connectWalletOnPageLoad wallet",wallet);
+          try {
+            activateInjectedProvider(wallet.id);
+            await activate(wallet.connector, undefined, true);
+            // setLocal(AUTH_LOCAL_ID, auth);
+          } catch (err) {
+            setLocal(LS_KEY, null);
+            console.log("connectWalletOnPageLoad err", err);
+            const messageError = getErrorMessage(err);
+            notification.error({
+              message: "Login Error",
+              description: messageError,
+            });
+            console.log(messageError);
+            setTried(true);
+          }
+        } else {
+          console.log("connectWalletOnPageLoad vao trong nay 1");
+          setTried(true);
+        }
+      } else {
+        console.log("connectWalletOnPageLoad vao trong nay 2");
+        setTried(true);
+      }
     };
     connectWalletOnPageLoad();
   }, []); // intentionally only running on mount (make sure it's only mounted once :))

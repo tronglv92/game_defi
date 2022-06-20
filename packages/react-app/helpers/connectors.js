@@ -58,6 +58,19 @@ export const connectorsByName = {
     id: WalletId.WalletLink,
   },
 };
+
+export const getWalletById = walletId => {
+  switch (walletId) {
+    case WalletId.Metamask:
+      return connectorsByName.METAMASK;
+    case WalletId.Coinbase:
+      return connectorsByName.COINBASE;
+    case WalletId.WalletLink:
+      return connectorsByName.WALLET;
+    default:
+      break;
+  }
+};
 export function activateInjectedProvider(providerName) {
   const { ethereum } = window;
 

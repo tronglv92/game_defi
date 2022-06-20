@@ -13,7 +13,7 @@ import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 // contracts
 import deployedContracts from "../contracts/hardhat_contracts.json";
 import externalContracts from "../contracts/external_contracts";
-import { activateInjectedProvider, getErrorMessage, injected } from "../helpers/connectors";
+import { activateInjectedProvider, getErrorMessage, getWalletById, injected } from "../helpers/connectors";
 import { useWeb3React } from "@web3-react/core";
 
 import { getLocal, setLocal } from "./local";
@@ -39,9 +39,11 @@ export function Web3Provider({ children, ...props }) {
   // const [injectedProvider, setInjectedProvider] = useState();
   const [yourLocalBalance, setYourLocalBalance] = useState(BigNumber.from(0));
   const [yourAccount, setYourAccount] = useState();
+  const [walletIdSelected, setWalletIdSelected] = useState();
   const [showModalLogin, setShowModalLogin] = useState(false);
   const [showModalDisplayNetWork, setShowModalDisplayNetWork] = useState(false);
   const [state, setState] = useState({});
+
   // const [address, setAddress] = useState();
 
   /// 📡 What chain are your contracts deployed to?
@@ -130,7 +132,7 @@ export function Web3Provider({ children, ...props }) {
     // logged in and when change network log out
     if (chainId && state.auth && !isNetworkSelected(chainId)) {
       console.log("vao trong nay 4");
-      deactivate();
+      logoutAccount();
     }
   }, [chainId]);
   const handleAuthenticate = ({ publicAddress, signature }) => {
@@ -166,12 +168,11 @@ export function Web3Provider({ children, ...props }) {
   };
 
   const signatureLogin = async () => {
-    console.log("signatureLogin account ", account);
+    console.log("walletIdSelected ", walletIdSelected);
     if (account) {
       setYourAccount(null);
       const publicAddress = account.toLowerCase();
-      console.log("signatureLogin account ", publicAddress);
-      console.log("process.env.REACT_APP_BACKEND_URL ", process.env.REACT_APP_BACKEND_URL);
+
       try {
         const users = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users?publicAddress=${publicAddress}`).then(
           response => response.json(),
@@ -182,20 +183,18 @@ export function Web3Provider({ children, ...props }) {
           user = users[0];
         } else {
           user = await handleSignup(publicAddress);
-          console.log("signatureLogin handleSignup data ", user);
         }
         const resultSign = await handleSignMessage(user);
-        console.log("resultSign ", resultSign);
+
         const auth = await handleAuthenticate(resultSign);
         auth.publicAddress = publicAddress;
-
+        if (walletIdSelected != null) auth.walletId = walletIdSelected;
+        console.log("auth ", auth);
         setLocal(LS_KEY, auth);
         setState({ auth });
         setYourAccount(account);
       } catch (ex) {
-        console.log("signatureLogin ex", ex);
-        console.log("vao trong nay 5");
-        deactivate();
+        logoutAccount();
         notification.error({
           message: "Login Error",
           description: ex.message,
@@ -203,12 +202,41 @@ export function Web3Provider({ children, ...props }) {
       }
     }
   };
+  const connectWalletOnPageLoad = async () => {
+    const auth = getLocal(LS_KEY);
+    console.log("connectWalletOnPageLoad auth ", auth);
 
+    if (auth) {
+      const { walletId } = auth;
+      console.log("connectWalletOnPageLoad walletId ", walletId);
+      if (walletId != null) {
+        setWalletIdSelected(walletId);
+        const wallet = getWalletById(walletId);
+
+        console.log("connectWalletOnPageLoad wallet", wallet);
+        try {
+          activateInjectedProvider(wallet.id);
+          await activate(wallet.connector, undefined, true);
+          // setLocal(AUTH_LOCAL_ID, auth);
+        } catch (err) {
+          logoutAccount();
+          console.log("connectWalletOnPageLoad err", err);
+          const messageError = getErrorMessage(err);
+          notification.error({
+            message: "Login Error",
+            description: messageError,
+          });
+          console.log(messageError);
+        }
+      } else {
+        console.log("connectWalletOnPageLoad walletId is null");
+      }
+    } else {
+      console.log("connectWalletOnPageLoad auth is null");
+    }
+  };
   useEffect(() => {
-    const ls = getLocal(LS_KEY);
-    const auth = ls;
-
-    setState({ auth });
+    connectWalletOnPageLoad();
   }, []);
 
   const loginCryto = chainId => {
@@ -223,18 +251,19 @@ export function Web3Provider({ children, ...props }) {
 
   // Change Account request user sign
   useEffect(() => {
-    console.log("Web3Context chainId ", chainId);
-    console.log("Web3Context account ", account);
+    console.log("CHANGE ACCOUNT ", account);
+    console.log("CHANGE AUTH ", state.auth);
     if (account) {
       // User logged in, check account and auth in local is same
       if (state.auth) {
         let publicAddress = state.auth.publicAddress;
-        console.log("publicAddress ", publicAddress);
-        console.log("publicAddress != account.toLocaleLowerCase() ", publicAddress != account.toLocaleLowerCase());
+
         if (publicAddress && publicAddress != account.toLocaleLowerCase()) {
           console.log("Vao trong 1");
 
           loginCryto(chainId);
+        } else {
+          console.log("Vao trong 3");
         }
       }
       // User just logged in after logout or fisttime
@@ -243,18 +272,8 @@ export function Web3Provider({ children, ...props }) {
         loginCryto(chainId);
       }
     }
-    //Logout -> account null
-    else {
-      clearAccount();
-    }
   }, [account, chainId]);
 
-  const clearAccount = () => {
-    setLocal(LS_KEY, null);
-    setYourAccount(null);
-    setYourLocalBalance(0);
-    setState({ auth: null });
-  };
   // You can warn the user if you would like them to be on a specific network
   const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
   const selectedChainId =
@@ -337,12 +356,25 @@ export function Web3Provider({ children, ...props }) {
     writeContracts,
     mainnetContracts,
   ]);
+  const logoutAccount = () => {
+    deactivate();
+    setLocal(LS_KEY, null);
+    setYourAccount(null);
+    setYourLocalBalance(0);
+    setState({ auth: null });
 
-  const onLogin = async value => {
-    console.log("onLoginMetaMask id ", value.id);
+    setWalletIdSelected(null);
+  };
+  const onLogin = async wallet => {
+    console.log("onLogin wallet ", wallet);
     try {
-      activateInjectedProvider(value.id);
-      await activate(value.connector, undefined, true);
+      setWalletIdSelected(wallet.id);
+      activateInjectedProvider(wallet.id);
+
+      await activate(wallet.connector, undefined, true);
+
+      console.log("onLogin account ", account);
+      console.log("onLogin library ", library);
 
       // localStorage.setItem("isWalletConnected", true);
     } catch (ex) {
@@ -352,7 +384,6 @@ export function Web3Provider({ children, ...props }) {
         message: "Login Error",
         description: msgError,
       });
-      setLocal(LS_KEY, null);
     }
     setShowModalLogin(false);
   };
@@ -362,7 +393,7 @@ export function Web3Provider({ children, ...props }) {
     //   await injectedProvider.provider.disconnect();
     // }
     console.log("vao trong nay 6");
-    deactivate();
+    logoutAccount();
   };
   // const triedEager = useEagerConnect();
 
