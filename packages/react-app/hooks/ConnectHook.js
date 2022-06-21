@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from "react"
 import { LS_KEY } from "../constants/key";
 import { notification } from "antd";
 export function useEagerConnectLogin(props) {
-  const { onLogin, onLogout, onError, walletId, localChainId, setShowModalDisplayNetWork } = props;
+  const { walletId, localChainId, setShowModalDisplayNetWork } = props;
   const { active, account, library, connector, chainId, activate, deactivate } = useWeb3React();
   const [walletIdSelected, setWalletIdSelected] = useState();
   const [yourAccount, setYourAccount] = useState();
