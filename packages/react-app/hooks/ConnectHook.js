@@ -1,7 +1,7 @@
 import { useWeb3React } from "@web3-react/core";
 import { activateInjectedProvider, getErrorMessage, getWalletById } from "../helpers/connectors";
 import { getLocal, setLocal } from "../helpers/local";
-import React, { useCallback, useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { LS_KEY } from "../constants/key";
 import { notification } from "antd";
 export function useEagerConnectLogin(props) {
