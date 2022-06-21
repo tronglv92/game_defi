@@ -21,16 +21,16 @@ function Layout({ children, web3 }) {
     library,
     walletIdSelected,
   } = web3;
-  const checkNetwork = async () => {
-    if (window.ethereum) {
-      const currentChainId = await library.provider.request({
-        method: "eth_chainId",
-      });
+  // const checkNetwork = async () => {
+  //   if (window.ethereum) {
+  //     const currentChainId = await library.provider.request({
+  //       method: "eth_chainId",
+  //     });
 
-      // return true if network id is the same
-      console.log("currentChainId ", currentChainId);
-    }
-  };
+  //     // return true if network id is the same
+  //     console.log("currentChainId ", currentChainId);
+  //   }
+  // };
   return (
     <>
       {/* Page Header start */}
@@ -93,7 +93,6 @@ function Layout({ children, web3 }) {
                   method: "wallet_addEthereumChain",
                   params: data,
                 });
-                loginCryto(data[0].chainId);
               } catch (addError) {
                 // handle "add" error
                 console.log("swich network addError ", addError);
