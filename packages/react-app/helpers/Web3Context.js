@@ -22,7 +22,7 @@ import { AUTH_LOCAL_ID, LS_KEY, METAMASK_ID } from "../constants/key";
 import { useBalance } from "../hooks/useBalance";
 import lib from "@ant-design/icons";
 import _ from "lodash";
-import { useEagerConnect } from "../hooks/ConnectHook";
+import { useEagerConnectLogin } from "../hooks/ConnectHook";
 const { ethers, BigNumber } = require("ethers");
 
 // create our app context
@@ -98,192 +98,6 @@ export function Web3Provider({ children, ...props }) {
   const userProviderAndSigner = useUserProviderAndSigner(library, localProvider);
   const userSigner = userProviderAndSigner.signer;
 
-  // useEffect(() => {
-  //   async function getAddress() {
-  //     if (userSigner) {
-  //       const newAddress = await userSigner.getAddress();
-  //       setAddress(newAddress);
-  //     }
-  //   }
-  //   getAddress();
-  // }, [userSigner]);
-
-  // useEffect(() => {
-  //   console.log("Web3Context library ", library);
-  //   setInjectedProvider(library);
-  // }, [library]);
-
-  // useEffect(() => {
-  //   // logged in and when change network log out
-  //   console.log("change network chainId ", chainId);
-  //   console.log("change network state.auth ", state.auth);
-  //   console.log("change network sNetworkSelected(chainId) ", isNetworkSelected(chainId));
-  //   if (chainId != null && state.auth && !isNetworkSelected(chainId)) {
-  //     console.log("vao trong nay 4");
-  //     logoutAccount();
-  //   }
-  // }, [chainId]);
-  // const handleAuthenticate = ({ publicAddress, signature }) => {
-  //   return fetch(`${process.env.REACT_APP_BACKEND_URL}/auth`, {
-  //     body: JSON.stringify({ publicAddress, signature }),
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     method: "POST",
-  //   }).then(response => response.json());
-  // };
-  // const handleSignMessage = async ({ publicAddress, nonce }) => {
-  //   try {
-  //     const signature = await library.send("personal_sign", [
-  //       `I am signing my one-time nonce: ${nonce}`,
-  //       publicAddress,
-  //     ]);
-
-  //     return { publicAddress, signature };
-  //   } catch (err) {
-  //     throw new Error("You need to sign the message to be able to log in.");
-  //   }
-  // };
-  // const handleSignup = publicAddress => {
-  //   console.log("JSON.stringify({ publicAddress }) ", JSON.stringify({ publicAddress }));
-  //   return fetch(`${process.env.REACT_APP_BACKEND_URL}/users`, {
-  //     body: JSON.stringify({ publicAddress }),
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     method: "POST",
-  //   }).then(response => response.json());
-  // };
-
-  // const signatureLogin = async () => {
-  //   console.log("walletIdSelected ", walletIdSelected);
-  //   if (account) {
-  //     setYourAccount(null);
-  //     const publicAddress = account.toLowerCase();
-
-  //     try {
-  //       const users = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users?publicAddress=${publicAddress}`).then(
-  //         response => response.json(),
-  //       );
-  //       // If yes, retrieve it. If no, create it.
-  //       let user;
-  //       if (users.length > 0) {
-  //         user = users[0];
-  //       } else {
-  //         user = await handleSignup(publicAddress);
-  //       }
-  //       const resultSign = await handleSignMessage(user);
-
-  //       const auth = await handleAuthenticate(resultSign);
-  //       auth.publicAddress = publicAddress;
-
-  //       if (walletIdSelected != null) auth.walletId = walletIdSelected;
-  //       console.log("auth ", auth);
-  //       setLocal(LS_KEY, auth);
-  //       setState({ auth });
-  //       setYourAccount(account);
-  //     } catch (ex) {
-  //       clearAccount();
-  //       notification.error({
-  //         message: "Login Error",
-  //         description: ex.message,
-  //       });
-  //     }
-  //   }
-  // };
-  // const connectWalletOnPageLoad = async () => {
-  //   const auth = getLocal(LS_KEY);
-  //   console.log("connectWalletOnPageLoad auth ", auth);
-  //   setState({ auth: auth });
-  //   if (auth) {
-  //     const { walletId } = auth;
-  //     console.log("connectWalletOnPageLoad walletId ", walletId);
-  //     if (walletId != null) {
-  //       setWalletIdSelected(walletId);
-  //       const wallet = getWalletById(walletId);
-
-  //       console.log("connectWalletOnPageLoad wallet", wallet);
-  //       try {
-  //         activateInjectedProvider(wallet.id);
-  //         await activate(wallet.connector, undefined, true);
-  //         // setLocal(AUTH_LOCAL_ID, auth);
-  //       } catch (err) {
-  //         clearAccount();
-  //         console.log("connectWalletOnPageLoad err", err);
-  //         const messageError = getErrorMessage(err);
-  //         notification.error({
-  //           message: "Login Error",
-  //           description: messageError,
-  //         });
-  //         console.log(messageError);
-  //       }
-  //     } else {
-  //       console.log("connectWalletOnPageLoad walletId is null");
-  //     }
-  //   } else {
-  //     console.log("connectWalletOnPageLoad auth is null");
-  //   }
-  // };
-  // useEffect(() => {
-  //   connectWalletOnPageLoad();
-  // }, []);
-
-  // const loginCryto = () => {
-  //   signatureLogin();
-  // };
-
-  // // Change Account request user sign
-  // useEffect(() => {
-  //   console.log("CHANGE ACCOUNT ", account);
-  //   console.log("CHANGE AUTH ", state.auth);
-
-  //   if (isNetworkSelected(chainId)) {
-  //     if (account) {
-  //       // User logged in, check account and auth in local is same
-  //       if (state.auth) {
-  //         let publicAddress = state.auth.publicAddress;
-  //         //User logged in and change account
-  //         if (publicAddress && publicAddress != account.toLocaleLowerCase()) {
-  //           console.log("Vao trong 1");
-
-  //           loginCryto();
-  //         } else {
-  //           console.log("Vao trong 2");
-  //           setYourAccount(account);
-  //         }
-  //       }
-  //       // User just logged in after logout or fisttime log in
-  //       else {
-  //         console.log("Vao trong 3");
-  //         loginCryto();
-  //       }
-  //     }
-  //     // User logout , clear account
-  //     else {
-  //       console.log("Vao trong 4");
-  //       clearAccount();
-  //     }
-  //   } else {
-  //     if (account) {
-  //       //User logged in and  User change network different netwok selected
-  //       if (state.auth) {
-  //         console.log("Vao trong 5");
-  //         deactivate();
-  //       }
-  //       // Login with different network selected
-  //       else {
-  //         console.log("Vao trong 6");
-  //         setShowModalDisplayNetWork(true);
-  //       }
-  //     }
-  //     // User logout clear account
-  //     else {
-  //       console.log("Vao trong 7");
-  //       clearAccount();
-  //     }
-  //   }
-  // }, [account, chainId]);
-
   // You can warn the user if you would like them to be on a specific network
   const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
   const selectedChainId =
@@ -297,17 +111,19 @@ export function Web3Provider({ children, ...props }) {
   // Faucet Tx can be used to send funds from the faucet
   const faucetTx = Transactor(localProvider, gasPrice);
 
-  const yourAccount = useEagerConnect({
+  const yourAccount = useEagerConnectLogin({
     walletId: walletIdSelected,
     localChainId: NETWORKS[network].chainId,
     setShowModalDisplayNetWork: setShowModalDisplayNetWork,
   });
   const getBalance = async () => {
     if (library && yourAccount) {
+      console.log("getBalance 1");
       const balanceAccount = await library.getBalance(yourAccount);
 
       setYourLocalBalance(balanceAccount);
     } else {
+      console.log("getBalance 2");
       setYourLocalBalance(BigNumber.from(0));
     }
   };
@@ -317,7 +133,17 @@ export function Web3Provider({ children, ...props }) {
   };
 
   useEffect(() => {
-    if (isNetworkSelected(chainId)) getBalance();
+    console.log("Calculation balance chainId ", chainId);
+    // have chainId=> have account=> have loggedin
+    if (chainId) {
+      if (isNetworkSelected(chainId)) {
+        getBalance();
+      }
+    }
+    // When logout=> chainId=null
+    else {
+      setYourLocalBalance(BigNumber.from(0));
+    }
   }, [library, yourAccount, chainId]);
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
   // const yourLocalBalance = useBalance(localProvider, account);

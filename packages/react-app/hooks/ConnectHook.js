@@ -4,7 +4,7 @@ import { getLocal, setLocal } from "../helpers/local";
 import React, { useCallback, useEffect, useState, useRef, useMemo } from "react";
 import { LS_KEY } from "../constants/key";
 import { notification } from "antd";
-export function useEagerConnect(props) {
+export function useEagerConnectLogin(props) {
   const { onLogin, onLogout, onError, walletId, localChainId, setShowModalDisplayNetWork } = props;
   const { active, account, library, connector, chainId, activate, deactivate } = useWeb3React();
   const [walletIdSelected, setWalletIdSelected] = useState();
@@ -99,7 +99,7 @@ export function useEagerConnect(props) {
         setState({ auth });
         setYourAccount(account);
       } catch (ex) {
-        clearAccount();
+        deactivate();
         notification.error({
           message: "Login Error",
           description: ex.message,

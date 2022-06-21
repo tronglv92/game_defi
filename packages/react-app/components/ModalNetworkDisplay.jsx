@@ -19,7 +19,7 @@ function ModalNetworkDisplay(props) {
         <div className="relative w-auto my-6 mx-auto max-w-3xl">
           {/*content*/}
           <div
-            className=" rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none border-2 border-solid"
+            className=" rounded-lg shadow-lg relative flex flex-col w-full bg-white  outline-none focus:outline-none border-2 border-solid"
             // onClick={e => {
             //   // do not close modal if anything inside modal content is clicked
             //   e.stopPropagation();
@@ -40,8 +40,8 @@ function ModalNetworkDisplay(props) {
             </div>
             {/*body*/}
             <div className="flex-col px-5">
-              <p className="text-3xl dark:text-white font-bold text-black text-center">Wrong Network</p>
-              <p className="text-base dark:text-white text-black leading-8 text-center">
+              <p className="text-3xl  font-bold text-black text-center">Wrong Network</p>
+              <p className="text-base  text-black leading-8 text-center">
                 Looks like you connected to an unsupported network.
                 <br /> Change your network to ETH mainet.
               </p>
