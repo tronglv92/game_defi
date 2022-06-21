@@ -3,10 +3,11 @@ import React from "react";
 import close from "../images/close.svg";
 import { connectorsByName } from "../helpers/connectors";
 import { useTheme } from "next-themes";
+import { WalletId } from "../constants/key";
 // displays a page header
 
 function ModalNetworkDisplay(props) {
-  const { onDisConnect, onChangeNetwork } = props;
+  const { onDisConnect, onChangeNetwork, walletIdSelected } = props;
   const { theme, setTheme } = useTheme();
   console.log("theme ", theme);
   return (
@@ -55,14 +56,16 @@ function ModalNetworkDisplay(props) {
               >
                 Disconnected
               </button>
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                onClick={() => {
-                  onChangeNetwork();
-                }}
-              >
-                Change Network
-              </button>
+              {walletIdSelected == WalletId.Metamask && (
+                <button
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => {
+                    onChangeNetwork();
+                  }}
+                >
+                  Change Network
+                </button>
+              )}
             </div>
           </div>
         </div>

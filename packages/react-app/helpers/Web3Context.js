@@ -21,6 +21,7 @@ import { AUTH_LOCAL_ID, LS_KEY, METAMASK_ID } from "../constants/key";
 import { useEagerConnect, useInactiveListener } from "../hooks/ConnecHook";
 import { useBalance } from "../hooks/useBalance";
 import lib from "@ant-design/icons";
+import _ from "lodash";
 const { ethers, BigNumber } = require("ethers");
 
 // create our app context
@@ -128,13 +129,16 @@ export function Web3Provider({ children, ...props }) {
     if (isNetworkSelected(chainId)) getBalance();
   }, [library, yourAccount, chainId]);
 
-  useEffect(() => {
-    // logged in and when change network log out
-    if (chainId && state.auth && !isNetworkSelected(chainId)) {
-      console.log("vao trong nay 4");
-      logoutAccount();
-    }
-  }, [chainId]);
+  // useEffect(() => {
+  //   // logged in and when change network log out
+  //   console.log("change network chainId ", chainId);
+  //   console.log("change network state.auth ", state.auth);
+  //   console.log("change network sNetworkSelected(chainId) ", isNetworkSelected(chainId));
+  //   if (chainId != null && state.auth && !isNetworkSelected(chainId)) {
+  //     console.log("vao trong nay 4");
+  //     logoutAccount();
+  //   }
+  // }, [chainId]);
   const handleAuthenticate = ({ publicAddress, signature }) => {
     return fetch(`${process.env.REACT_APP_BACKEND_URL}/auth`, {
       body: JSON.stringify({ publicAddress, signature }),
@@ -188,6 +192,7 @@ export function Web3Provider({ children, ...props }) {
 
         const auth = await handleAuthenticate(resultSign);
         auth.publicAddress = publicAddress;
+
         if (walletIdSelected != null) auth.walletId = walletIdSelected;
         console.log("auth ", auth);
         setLocal(LS_KEY, auth);
@@ -205,7 +210,7 @@ export function Web3Provider({ children, ...props }) {
   const connectWalletOnPageLoad = async () => {
     const auth = getLocal(LS_KEY);
     console.log("connectWalletOnPageLoad auth ", auth);
-
+    setState({ auth: auth });
     if (auth) {
       const { walletId } = auth;
       console.log("connectWalletOnPageLoad walletId ", walletId);
@@ -240,36 +245,42 @@ export function Web3Provider({ children, ...props }) {
   }, []);
 
   const loginCryto = chainId => {
-    if (isNetworkSelected(chainId)) {
-      signatureLogin();
-    } else {
-      // notification.error({ description: "Wrong network" });
-      // deactivate();
-      setShowModalDisplayNetWork(true);
-    }
+    signatureLogin();
   };
 
   // Change Account request user sign
   useEffect(() => {
     console.log("CHANGE ACCOUNT ", account);
     console.log("CHANGE AUTH ", state.auth);
-    if (account) {
-      // User logged in, check account and auth in local is same
-      if (state.auth) {
-        let publicAddress = state.auth.publicAddress;
+    if (chainId) {
+      if (isNetworkSelected(chainId)) {
+        if (account) {
+          // User logged in, check account and auth in local is same
+          if (state.auth) {
+            let publicAddress = state.auth.publicAddress;
 
-        if (publicAddress && publicAddress != account.toLocaleLowerCase()) {
-          console.log("Vao trong 1");
+            if (publicAddress && publicAddress != account.toLocaleLowerCase()) {
+              console.log("Vao trong 1");
 
-          loginCryto(chainId);
-        } else {
-          console.log("Vao trong 3");
+              loginCryto(chainId);
+            } else {
+              console.log("Vao trong 3");
+              setYourAccount(account);
+            }
+          }
+          // User just logged in after logout or fisttime
+          else {
+            console.log("Vao trong 2");
+            loginCryto(chainId);
+          }
         }
-      }
-      // User just logged in after logout or fisttime
-      else {
-        console.log("Vao trong 2");
-        loginCryto(chainId);
+      } else {
+        if (state.auth) {
+          console.log("vao trong nay 4");
+          logoutAccount();
+        } else {
+          setShowModalDisplayNetWork(true);
+        }
       }
     }
   }, [account, chainId]);
@@ -357,13 +368,12 @@ export function Web3Provider({ children, ...props }) {
     mainnetContracts,
   ]);
   const logoutAccount = () => {
-    deactivate();
     setLocal(LS_KEY, null);
     setYourAccount(null);
     setYourLocalBalance(0);
     setState({ auth: null });
-
     setWalletIdSelected(null);
+    deactivate();
   };
   const onLogin = async wallet => {
     console.log("onLogin wallet ", wallet);
@@ -463,6 +473,7 @@ export function Web3Provider({ children, ...props }) {
     setShowModalDisplayNetWork,
     yourAccount,
     loginCryto,
+    walletIdSelected,
   };
 
   return <Web3Context.Provider value={providerProps}>{children}</Web3Context.Provider>;

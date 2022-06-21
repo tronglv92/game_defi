@@ -18,10 +18,12 @@ function Layout({ children, web3 }) {
     setShowModalDisplayNetWork,
     targetNetwork,
     loginCryto,
+    library,
+    walletIdSelected,
   } = web3;
   const checkNetwork = async () => {
     if (window.ethereum) {
-      const currentChainId = await window.ethereum.request({
+      const currentChainId = await library.provider.request({
         method: "eth_chainId",
       });
 
@@ -60,10 +62,10 @@ function Layout({ children, web3 }) {
       )}
       {showModalDisplayNetWork == true && (
         <ModalNetworkDisplay
+          walletIdSelected={walletIdSelected}
           onChangeNetwork={async () => {
-            checkNetwork();
+            // checkNetwork();
             // console.log("targetNetwork ", targetNetwork);
-            const ethereum = window.ethereum;
 
             const data = [
               {
@@ -79,7 +81,7 @@ function Layout({ children, web3 }) {
             let switchTx;
             // https://docs.metamask.io/guide/rpc-api.html#other-rpc-methods
             try {
-              switchTx = await ethereum.request({
+              switchTx = await library.provider.request({
                 method: "wallet_switchEthereumChain",
                 params: [{ chainId: data[0].chainId }],
               });
@@ -87,7 +89,7 @@ function Layout({ children, web3 }) {
               console.log("swich network switchError ", switchError);
               // not checking specific error code, because maybe we're not using MetaMask
               try {
-                switchTx = await ethereum.request({
+                switchTx = await library.provider.request({
                   method: "wallet_addEthereumChain",
                   params: data,
                 });
