@@ -1,0 +1,47 @@
+[
+  {
+    "pk": 1,
+    "name": "Staff magic",
+    "type": 0,
+    "image": "https://static.knightwar.io/staff/id1066_1214_1294.png",
+    "level": 1,
+    "isBox": false,
+    "price": 0.01
+  },
+  {
+    "pk": 2,
+    "name": "Sword magic",
+    "type": 0,
+    "image": "https://static.knightwar.io/sword/id49_302_345.png",
+    "level": 1,
+    "isBox": false,
+    "price": 0.02
+  },
+  {
+    "pk": 3,
+    "name": "Bow magic",
+    "type": 0,
+    "image": "https://static.knightwar.io/bow/id609_682_811.png",
+    "level": 1,
+    "isBox": false,
+    "price": 0.03
+  },
+  {
+    "pk": 4,
+    "name": "Sword gold",
+    "type": 0,
+    "image": "https://static.knightwar.io/sword/id40_251_330.png",
+    "level": 1,
+    "isBox": false,
+    "price": 0.04
+  },
+  {
+    "pk": 5,
+    "name": "Sword white",
+    "type": 0,
+    "image": "https://static.knightwar.io/staff/id1066_1214_1294.png",
+    "level": 1,
+    "isBox": false,
+    "price": 0.05
+  }
+]
