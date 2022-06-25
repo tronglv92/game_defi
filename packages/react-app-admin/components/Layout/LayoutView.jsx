@@ -25,13 +25,16 @@ function getItem(label, key, icon, children) {
     label,
   };
 }
-
+const MENU_KEY = {
+  Weapon: "Weapon",
+  User: "User",
+};
 const items = [
-  getItem("Option 1", "1", <PieChartOutlined />),
-  getItem("Option 2", "2", <DesktopOutlined />),
-  getItem("User", "sub1", <UserOutlined />, [getItem("Tom", "3"), getItem("Bill", "4"), getItem("Alex", "5")]),
-  getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "6"), getItem("Team 2", "8")]),
-  getItem("Files", "9", <FileOutlined />),
+  getItem("Weapon", MENU_KEY.Weapon, <PieChartOutlined />),
+  getItem("User", MENU_KEY.User, <UserOutlined />, [getItem("Tom", "Tom")]),
+  // getItem("User", "sub1", <UserOutlined />, [getItem("Tom", "3"), getItem("Bill", "4"), getItem("Alex", "5")]),
+  // getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "6"), getItem("Team 2", "8")]),
+  // getItem("Files", "9", <FileOutlined />),
 ];
 const { Header, Content, Footer, Sider } = Layout;
 function LayoutView({ children, web3 }) {
@@ -47,15 +50,33 @@ function LayoutView({ children, web3 }) {
     library,
     walletIdSelected,
   } = web3;
-
+  const defaultSelectedKeys = [MENU_KEY.Weapon];
   const [collapsed, setCollapsed] = useState(false);
+  const [breadcrums, setBreadCrums] = useState(defaultSelectedKeys);
+  const onSelectedMenu = menu => {
+    setBreadCrums(menu.keyPath);
+    
+  };
 
   return (
     <>
-      <Layout>
+      <Layout
+        style={{
+          minHeight: "100vh",
+        }}
+      >
         <Sider collapsed={collapsed} onCollapse={value => setCollapsed(value)}>
           <div className="logo" />
-          <Menu theme="dark" defaultSelectedKeys={["1"]} mode="inline" items={items} />
+          <Menu
+            theme="dark"
+            defaultSelectedKeys={defaultSelectedKeys}
+            mode="inline"
+            items={items}
+            onSelect={menu => {
+              onSelectedMenu(menu);
+              console.log("Select menu menu ", menu);
+            }}
+          />
         </Sider>
         <Layout>
           <Header
@@ -96,8 +117,9 @@ function LayoutView({ children, web3 }) {
                 margin: "16px 0",
               }}
             >
-              <Breadcrumb.Item>User</Breadcrumb.Item>
-              <Breadcrumb.Item>Bill</Breadcrumb.Item>
+              {breadcrums.map(item => {
+                return <Breadcrumb.Item>{item}</Breadcrumb.Item>;
+              })}
             </Breadcrumb>
             <div
               className="site-layout-background"
