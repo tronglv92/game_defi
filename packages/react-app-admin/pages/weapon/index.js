@@ -1,9 +1,20 @@
-import { Web3Consumer } from "../helpers/Web3Context";
+import { Web3Consumer } from "../../helpers/Web3Context";
 import React, { useContext } from "react";
 import { useContractReader } from "eth-hooks";
 import { Button, Card, Col, Divider, Pagination, Row } from "antd";
+import { useRouter } from "next/router";
+import { CREATE_WEAPON_PATH } from "../../constants/path";
 function AdminWeapon({ web3 }) {
   const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  const router = useRouter();
+  const onCreateWeapon = () => {
+    router.push({
+      pathname: CREATE_WEAPON_PATH,
+    });
+  };
+  const onShowSizeChange = (current, pageSize) => {
+    console.log(current, pageSize);
+  };
   const renderItem = (item, index) => {
     return (
       <>
@@ -28,6 +39,7 @@ function AdminWeapon({ web3 }) {
       </>
     );
   };
+
   const renderHeadGrid = () => {
     return (
       <Row gutter={[16, 16]} className="pl-5 pr-5 pt-5 pb-5" align="middle" justify="center">
@@ -56,16 +68,14 @@ function AdminWeapon({ web3 }) {
       </Row>
     );
   };
-  const onShowSizeChange = (current, pageSize) => {
-    console.log(current, pageSize);
-  };
+
   return (
     <>
       <Card bodyStyle={{ paddingRight: 0, paddingLeft: 0 }}>
         <Col>
           <Row className="ml-5 mr-5 flex">
             <Row className="flex-1">
-              <Button type="primary" className="mr-5">
+              <Button type="primary" className="mr-5" onClick={onCreateWeapon}>
                 Create Weapon
               </Button>
               <Button type="primary">Upload Market</Button>

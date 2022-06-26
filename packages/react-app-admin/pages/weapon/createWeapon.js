@@ -1,4 +1,4 @@
-import { Web3Consumer } from "../helpers/Web3Context";
+import { Web3Consumer } from "../../helpers/Web3Context";
 import React, { useContext, useState } from "react";
 import { useContractReader } from "eth-hooks";
 import {
@@ -10,14 +10,16 @@ import {
   Input,
   InputNumber,
   message,
+  notification,
   Pagination,
   Rate,
   Row,
   Select,
   Slider,
+  Switch,
   Upload,
 } from "antd";
-import UploadImage from "../components/UploadImage";
+import UploadImage from "../../components/UploadImage";
 import TextArea from "antd/lib/input/TextArea";
 import { DeleteOutlined, LoadingOutlined, PlusCircleFilled, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 const getBase64 = (img, callback) => {
@@ -44,12 +46,35 @@ const beforeUpload = file => {
 function CreateWeapon({ web3 }) {
   const [value, setValue] = useState(3);
   const [abilities, setAbilities] = useState([{ img: null, des: null, level: null, url: null }]);
+  const [itemsInBox, setItemInBox] = useState([
+    { star: 1, percent: null },
+    { star: 2, percent: null },
+    { star: 3, percent: null },
+  ]);
   const [imageUrlWeapon, setImageUrlWeapon] = useState();
+  const [isBox, setIsBox] = useState(true);
   const [loadingWeapon, setLoadingWeapon] = useState(false);
 
   const onFinish = info => {
     info.abilities = abilities;
-    console.log("onFinish ", info);
+    info.itemsInBox = itemsInBox;
+    console.log("info ", info);
+    let sumPercent = 0;
+    for (let i = 0; i < itemsInBox.length; i++) {
+      let percent = itemsInBox[i].percent;
+
+      if (percent != null) {
+        sumPercent += percent;
+      }
+    }
+
+    if (info.is_box == true && sumPercent != 100) {
+      notification.error({
+        message: "Add Product",
+        description: "Sum percent item in box must be 100 ",
+      });
+      return;
+    }
   };
   const onAddAbilities = () => {
     let abilitiesClone = [...abilities];
@@ -111,6 +136,11 @@ function CreateWeapon({ web3 }) {
       console.log(i`${info.file.name} file upload failed.`);
     }
   };
+  const onChangePercentItemInBox = (percent, index) => {
+    let itemsInBoxClone = [...itemsInBox];
+    itemsInBoxClone[index].percent = percent;
+    setItemInBox(itemsInBoxClone);
+  };
   const uploadButton = (
     <div>
       {loadingWeapon ? <LoadingOutlined /> : <PlusOutlined />}
@@ -138,6 +168,7 @@ function CreateWeapon({ web3 }) {
               weapon_speed: 1.1,
               weapon_duration: 100,
               weapon_critical: 55,
+              is_box: isBox,
             }}
             onFinish={onFinish}
           >
@@ -149,6 +180,15 @@ function CreateWeapon({ web3 }) {
             <p className="text-black font-bold text-3xl  mt-16">Info Weapon</p>
             <Divider style={{ marginTop: 0 }} />
             <div className="mt-16 mb-16">
+              <Form.Item label="Box" name={"is_box"}>
+                <Switch
+                  defaultChecked={isBox}
+                  onChange={isBox => {
+                    console.log("isBox ", isBox);
+                    setIsBox(isBox);
+                  }}
+                />
+              </Form.Item>
               <Form.Item
                 name="weapon_img"
                 label="Image"
@@ -280,87 +320,130 @@ function CreateWeapon({ web3 }) {
               </Col>
             </Row>
             <Form.Item label="Star" className="text-black font-bold" name={"weapon_rate"}>
-              <Rate onChange={setValue} value={value} />
+              <Rate onChange={setValue} value={value} count={3} />
             </Form.Item>
 
-            <p className="text-black font-bold text-3xl  mt-16">Stat Weapon</p>
-            <Divider style={{ marginTop: 0 }} />
-            <Form.Item label="Damage" name="weapon_damage" className="text-black font-bold">
-              <Slider defaultValue={100} max={1000} min={1} />
-            </Form.Item>
-            <Form.Item label="Speed" name="weapon_speed" className="text-black font-bold">
-              <Slider defaultValue={1.5} max={2} min={1} step={0.1} />
-            </Form.Item>
-            <Form.Item label="Duration" name="weapon_duration" className="text-black font-bold">
-              <Slider defaultValue={30} max={100} min={0} />
-            </Form.Item>
-            <Form.Item label="Critical" name="weapon_critical" className="text-black font-bold">
-              <Slider defaultValue={11} max={100} min={1} />
-            </Form.Item>
+            {isBox == false && (
+              <Col>
+                <p className="text-black font-bold text-3xl  mt-16">Stat Weapon</p>
+                <Divider style={{ marginTop: 0 }} />
+                <Form.Item label="Damage" name="weapon_damage" className="text-black font-bold">
+                  <Slider defaultValue={100} max={1000} min={1} />
+                </Form.Item>
+                <Form.Item label="Speed" name="weapon_speed" className="text-black font-bold">
+                  <Slider defaultValue={1.5} max={2} min={1} step={0.1} />
+                </Form.Item>
+                <Form.Item label="Duration" name="weapon_duration" className="text-black font-bold">
+                  <Slider defaultValue={30} max={100} min={0} />
+                </Form.Item>
+                <Form.Item label="Critical" name="weapon_critical" className="text-black font-bold">
+                  <Slider defaultValue={11} max={100} min={1} />
+                </Form.Item>
+              </Col>
+            )}
 
-            <Row align="middle" className="mt-16 mb-5">
-              <p className="text-black font-bold text-3xl mb-0 mr-5 mt-0">Abilities</p>
-              <PlusCircleFilled style={{ fontSize: "32px", color: "blue" }} onClick={onAddAbilities} />
-            </Row>
-
-            <Divider style={{ marginTop: 0 }} />
-            {abilities.map((item, index) => {
-              return (
-                <Row>
-                  <Col span={4}>
-                    <Form.Item label="Image" className="text-black font-bold">
-                      <Upload
-                        maxCount={1}
-                        listType="picture-card"
-                        showUploadList={false}
-                        beforeUpload={beforeUpload}
-                        onChange={info => onChangeImgAbilities(info, index)}
-                      >
-                        {item.url ? (
-                          <img
-                            src={item.url}
-                            alt="avatar"
-                            style={{
-                              width: "100%",
-                            }}
-                          />
-                        ) : (
-                          uploadButton
-                        )}
-                      </Upload>
-                    </Form.Item>
-                  </Col>
-                  <Col span={10}>
-                    <Form.Item label="Description" className="text-black font-bold" wrapperCol={{ span: 20 }}>
-                      <TextArea value={item.des} onChange={e => onChangeDesAbilities(e, index)} />
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item label="Level" className="text-black font-bold">
-                      <InputNumber
-                        style={{
-                          width: 200,
-                        }}
-                        value={item.level ? item.level : 1}
-                        min="1"
-                        max="10"
-                        step="1"
-                        stringMode
-                        onChange={e => onChangeLevelAbilities(e, index)}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={2}>
-                    <div className="h-24 flex  justify-center items-center align-middle">
-                      <DeleteOutlined
-                        style={{ fontSize: "20px", color: "red" }}
-                        onClick={() => onRemoveAbilities(index)}
-                      />
-                    </div>
-                  </Col>
+            {isBox == false && (
+              <Col>
+                <Row align="middle" className="mt-16 mb-5">
+                  <p className="text-black font-bold text-3xl mb-0 mr-5 mt-0">Abilities</p>
+                  <PlusCircleFilled style={{ fontSize: "32px", color: "blue" }} onClick={onAddAbilities} />
                 </Row>
-              );
-            })}
+
+                <Divider style={{ marginTop: 0 }} />
+                {abilities.map((item, index) => {
+                  return (
+                    <Row>
+                      <Col span={4}>
+                        <Form.Item label="Image" className="text-black font-bold">
+                          <Upload
+                            maxCount={1}
+                            listType="picture-card"
+                            showUploadList={false}
+                            beforeUpload={beforeUpload}
+                            onChange={info => onChangeImgAbilities(info, index)}
+                          >
+                            {item.url ? (
+                              <img
+                                src={item.url}
+                                alt="avatar"
+                                style={{
+                                  width: "100%",
+                                }}
+                              />
+                            ) : (
+                              uploadButton
+                            )}
+                          </Upload>
+                        </Form.Item>
+                      </Col>
+                      <Col span={10}>
+                        <Form.Item label="Description" className="text-black font-bold" wrapperCol={{ span: 20 }}>
+                          <TextArea value={item.des} onChange={e => onChangeDesAbilities(e, index)} />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item label="Level" className="text-black font-bold">
+                          <InputNumber
+                            style={{
+                              width: 200,
+                            }}
+                            value={item.level ? item.level : 1}
+                            min="1"
+                            max="10"
+                            step="1"
+                            stringMode
+                            onChange={e => onChangeLevelAbilities(e, index)}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={2}>
+                        <div className="h-24 flex  justify-center items-center align-middle">
+                          <DeleteOutlined
+                            style={{ fontSize: "20px", color: "red" }}
+                            onClick={() => onRemoveAbilities(index)}
+                          />
+                        </div>
+                      </Col>
+                    </Row>
+                  );
+                })}
+              </Col>
+            )}
+            {isBox == true && (
+              <Col>
+                <Row align="middle" className="mt-16 mb-5">
+                  <p className="text-black font-bold text-3xl mb-0 mr-5 mt-0">Item In Box</p>
+                </Row>
+
+                <Divider style={{ marginTop: 0 }} />
+                {itemsInBox.map((item, index) => {
+                  return (
+                    <Row>
+                      <Col span={12}>
+                        <Form.Item label={index == 0 ? "Star" : " "} className="text-black font-bold">
+                          <Rate value={item.star} disabled count={item.star} />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item label={index == 0 ? "Percent" : " "} className="text-black font-bold">
+                          <InputNumber
+                            defaultValue={0}
+                            value={item.percent ? item.percent : 0}
+                            min={0}
+                            max={100}
+                            formatter={value => `${value}%`}
+                            onChange={percent => {
+                              onChangePercentItemInBox(percent, index);
+                            }}
+                            parser={value => value.replace("%", "")}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  );
+                })}
+              </Col>
+            )}
           </Form>
         </div>
       </Card>

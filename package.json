@@ -16,6 +16,7 @@
     "react-app:test": "yarn workspace @scaffold-eth/react-app test",
     "dev": "yarn workspace @scaffold-eth/react-app dev",
     "build": "yarn workspace @scaffold-eth/react-app build",
+    "build-admin": "yarn workspace @scaffold-eth/react-app-admin build",
     "prettier": "yarn workspace @scaffold-eth/react-app prettier",
     "chain": "yarn workspace @scaffold-eth/hardhat chain",
     "fork": "yarn workspace @scaffold-eth/hardhat fork",
