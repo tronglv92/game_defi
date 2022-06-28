@@ -1,5 +1,5 @@
 import { useWeb3React } from "@web3-react/core";
-import { Button } from "antd";
+import { Button, Row } from "antd";
 import React from "react";
 
 import Address from "./Address";
@@ -73,6 +73,7 @@ export default function Account({
         style={{ verticalAlign: "top", marginLeft: 8, marginTop: 4 }}
         shape="round"
         size="large"
+        type="primary"
         /* type={minimized ? "default" : "primary"}     too many people just defaulting to MM and having a bad time */
         onClick={onConnect}
       >
@@ -84,7 +85,7 @@ export default function Account({
   const display = minimized ? (
     ""
   ) : (
-    <span>
+    <span className="text-white">
       {yourAccount ? (
         <Address address={yourAccount} ensProvider={mainnetProvider} blockExplorer={blockExplorer} />
       ) : (
@@ -103,9 +104,9 @@ export default function Account({
   );
 
   return (
-    <div>
+    <Row align="middle">
       {display}
       {modalButtons}
-    </div>
+    </Row>
   );
 }
