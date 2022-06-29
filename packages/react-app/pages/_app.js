@@ -9,8 +9,10 @@ import Head from "next/head";
 import { ethers } from "ethers";
 import { POLLING_INTERVAL } from "../helpers/connectors";
 import Layout from "../components/Layout/LayoutView";
-
+import { useRouter } from "next/router";
+import { MARKETING_PATH } from "../constants/path";
 function MyApp({ Component, pageProps }) {
+  const router = useRouter();
   const prevTheme = useRef("light");
 
   const themes = {
@@ -21,6 +23,10 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     prevTheme.current = window.localStorage.getItem("theme");
     console.log("useEffect DB_USER ", process.env.DB_USER);
+    router.push({
+      pathname: MARKETING_PATH,
+      // query: { returnUrl: router.asPath },
+    });
   }, []);
   function getLibrary(provider) {
     console.log("provider ", provider);

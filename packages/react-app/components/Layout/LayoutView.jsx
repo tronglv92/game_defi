@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { WalletId } from "../../constants/key";
-import { activateInjectedProvider } from "../../helpers/connectors";
+import { MenuId, MENU_ID, WalletId } from "../../constants/key";
 
 import { Web3Consumer } from "../../helpers/Web3Context";
 import Account from "../Account";
@@ -10,18 +9,9 @@ import ModalNetworkDisplay from "../ModalNetworkDisplay";
 import { Breadcrumb, Button, Drawer, Layout, Menu, Row } from "antd";
 import icMysteryBox from "../../public/ic-mystery-box.svg";
 import icMarketPlace from "../../public/ic-marketplace.svg";
-import {
-  DesktopOutlined,
-  FileOutlined,
-  MenuFoldOutlined,
-  MenuOutlined,
-  MenuUnfoldOutlined,
-  PieChartOutlined,
-  TeamOutlined,
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
+import { MenuOutlined } from "@ant-design/icons";
+import { useRouter } from "next/router";
+import { MARKETING_PATH, MYSTERY_BOX_PATH } from "../../constants/path";
 const { Header, Content, Footer } = Layout;
 function getItem(label, key, icon, children) {
   return {
@@ -32,8 +22,8 @@ function getItem(label, key, icon, children) {
   };
 }
 const items = [
-  getItem("Weapon", "Weapon"),
-  getItem("Mystery Boxes", "MysteryBoxes"),
+  getItem("Weapon", MENU_ID.Weapons),
+  getItem("Mystery Boxes", MENU_ID.MysteryBoxes),
 
   // getItem("User", "sub1", <UserOutlined />, [getItem("Tom", "3"), getItem("Bill", "4"), getItem("Alex", "5")]),
   // getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "6"), getItem("Team 2", "8")]),
@@ -62,6 +52,7 @@ function LayoutView({ children, web3 }) {
   //     console.log("currentChainId ", currentChainId);
   //   }
   // };
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
   const showDrawer = () => {
     setVisible(true);
@@ -69,6 +60,30 @@ function LayoutView({ children, web3 }) {
 
   const onClose = () => {
     setVisible(false);
+  };
+  const onClickMenu = menu => {
+    const { item, key, keyPath, domEvent } = menu;
+    console.log("menu ", menu);
+    console.log("router ", router);
+    const path = router.asPath;
+    switch (key) {
+      case MENU_ID.Weapons:
+        if (path != MARKETING_PATH) {
+          router.push({
+            pathname: MARKETING_PATH,
+          });
+        }
+        break;
+      case MENU_ID.MysteryBoxes:
+        if (path != MYSTERY_BOX_PATH) {
+          router.push({
+            pathname: MYSTERY_BOX_PATH,
+          });
+        }
+        break;
+      default:
+        break;
+    }
   };
   const isMobile = useMediaQuery({ query: `(max-width: 760px)` });
   return (
@@ -104,7 +119,13 @@ function LayoutView({ children, web3 }) {
           >
             <Row align="middle">
               <div />
-              <Menu theme="dark" mode="horizontal" defaultSelectedKeys={["2"]} items={items} />
+              <Menu
+                theme="dark"
+                mode="horizontal"
+                defaultSelectedKeys={[MENU_ID.Weapons]}
+                items={items}
+                onClick={onClickMenu}
+              />
             </Row>
 
             <Account

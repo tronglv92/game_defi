@@ -1,19 +1,15 @@
-import { useContractReader } from "eth-hooks";
 import React, { useContext, useState } from "react";
 
-import Image from "next/image";
-import { Row, Col, Card, Rate, Divider, Checkbox, Button } from "antd";
-import icStaff from "../../public/ic-staff-small.svg";
+import { Rate } from "antd";
+
 import staff from "../../public/staff.svg";
-import bow from "../../public/bow.svg";
-import { FilterOutlined, LeftOutlined } from "@ant-design/icons";
-import Filter from "../../components/Filter";
-import { useMediaQuery } from "react-responsive";
-import styles from "../../components/nft.module.css";
-function Detail({ web3 }) {
+
+import { LeftOutlined } from "@ant-design/icons";
+
+function DetailWeapon({ web3 }) {
   return (
     <>
-      <div className="py-5 md:py-[50px] max-w-screen-2xl">
+      <div className="py-5 md:py-[50px] max-w-screen-2xl mx-auto">
         <div className="flex items-center justify-between ">
           <div className="flex items-center">
             <LeftOutlined style={{ color: "#FFC700", fontSize: "30px", fontWeight: "bold" }} />
@@ -173,4 +169,4 @@ function Detail({ web3 }) {
     </>
   );
 }
-export default Detail;
+export default DetailWeapon;
