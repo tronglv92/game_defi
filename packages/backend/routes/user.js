@@ -1,5 +1,6 @@
 const express = require("express");
-const { expressjwt: jwt } = require("express-jwt");
+
+const isAuth = require("../middleware/is-auth");
 const { config } = require("../config");
 const controller = require("../controllers/user");
 
@@ -10,7 +11,7 @@ const userRouter = express.Router();
 userRouter.get("/", controller.find);
 /** GET /api/users/:userId */
 /** Authenticated route */
-userRouter.route("/:userId").get(jwt(config), controller.get);
+userRouter.get("/:userId", isAuth, controller.get);
 
 /** POST /users */
 
@@ -18,6 +19,6 @@ userRouter.post("/", controller.createUser);
 
 /** PATCH /api/users/:userId */
 /** Authenticated route */
-userRouter.route("/:userId").patch(jwt(config), controller.patch);
+userRouter.patch("/:userId", isAuth, controller.patch);
 
 module.exports = userRouter;

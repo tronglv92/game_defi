@@ -58,22 +58,22 @@ function DetailWeapon({ web3 }) {
               >
                 about
               </span>
-              <div className="flex">
-                <div className="flex flex-1 items-center">
+              <div className="grid grid-cols-2 gap-15">
+                <div className="flex items-center">
                   <span className="text-[#F3D29C] text-[17px] font-bold w-24">Type</span>
                   <img src={staff.src} />
                 </div>
-                <div className="flex flex-1 items-center">
+                <div className="flex  items-center">
                   <span className="text-[#F3D29C] text-[17px] font-bold w-24">Level</span>
                   <span className="text-white font-bold text-base">12</span>
                 </div>
               </div>
-              <div className="mt-8 flex ">
-                <div className="flex flex-1 items-center">
+              <div className="mt-8 grid grid-cols-2 gap-15 ">
+                <div className="flex items-center">
                   <span className="text-[#F3D29C] text-[17px] font-bold w-24">ID</span>
                   <span className="text-white font-bold text-base">#1001905</span>
                 </div>
-                <div className="flex flex-1 items-center">
+                <div className="flex  items-center">
                   <span className="text-[#F3D29C] text-[17px] font-bold w-24">Star</span>
                   <Rate count={1} value={1} style={{ fontSize: "16px" }} />
                 </div>

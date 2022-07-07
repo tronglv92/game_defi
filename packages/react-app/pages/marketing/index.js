@@ -70,7 +70,7 @@ function Marketing({ web3 }) {
           <Row gutter={[16, 16]} style={{ marginTop: "20px", marginLeft: "20px" }}>
             {items.map((item, index) => {
               return (
-                <Col xs={24} sm={12} md={24} lg={12} xl={8} xxl={6}>
+                <Col xs={24} sm={12} md={24} lg={12} xl={8} xxl={6} key={index}>
                   <div
                     style={{
                       minWidth: "222px",

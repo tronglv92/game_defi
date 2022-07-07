@@ -2,7 +2,7 @@ const User = require("../models/user.model");
 
 exports.find = (req, res, next) => {
   // If a query string ?publicAddress=... is given, then filter results
-  console.log("vao trong nay 1");
+
   const whereClause =
     req.query && req.query.publicAddress
       ? {
@@ -13,30 +13,48 @@ exports.find = (req, res, next) => {
       : undefined;
   return User.findAll(whereClause)
     .then((users) => res.json(users))
-    .catch(next);
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };
 exports.get = (req, res, next) => {
   // AccessToken payload is in req.user.payload, especially its `id` field
   // UserId is the param in /users/:userId
   // We only allow user accessing herself, i.e. require payload.id==userId
-  if (req.user.payload.id !== req.params.userId) {
-    return res.status(401).send({ error: "You can can only access yourself" });
+  console.log("req ", req.params);
+  if (req.userId !== req.params.userId) {
+    const error = new Error("You can can only access yourself");
+    error.statusCode = 401;
+    throw error;
   }
   return User.findByPk(req.params.userId)
     .then((user) => res.json(user))
-    .catch(next);
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };
 exports.createUser = (req, res, next) => {
-  console.log("vao trong nay 2");
-  console.log("req.body ", req.body);
   return User.create(req.body)
     .then((user) => res.json(user))
-    .catch(next);
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };
 exports.patch = (req, res, next) => {
   // Only allow to fetch current user
-  if (req.user.payload.id !== req.params.userId) {
-    return res.status(401).send({ error: "You can can only access yourself" });
+  if (req.userId !== req.params.userId) {
+    const error = new Error("You can can only access yourself");
+    error.statusCode = 401;
+    throw error;
   }
   return User.findByPk(req.params.userId)
     .then((user) => {
@@ -47,11 +65,20 @@ exports.patch = (req, res, next) => {
       return user.save();
     })
     .then((user) => {
-      return user
-        ? res.json(user)
-        : res.status(401).send({
-            error: `User with publicAddress ${req.params.userId} is not found in database`,
-          });
+      if (user) {
+        return res.json(user);
+      } else {
+        const error = new Error(
+          `User with publicAddress ${req.params.userId} is not found in database`
+        );
+        error.statusCode = 401;
+        throw error;
+      }
     })
-    .catch(next);
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };

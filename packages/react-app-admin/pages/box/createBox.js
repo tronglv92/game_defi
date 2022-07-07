@@ -213,6 +213,7 @@ function CreateWeapon({ web3 }) {
                 </Upload>
               </Form.Item>
             </div>
+
             <Row>
               <Col span={12}>
                 <Form.Item
@@ -232,30 +233,6 @@ function CreateWeapon({ web3 }) {
                   <Input />
                 </Form.Item>
               </Col>
-              <Col span={12}>
-                <Form.Item
-                  label="Type"
-                  name={"weapon_type"}
-                  className="text-black font-bold"
-                  wrapperCol={{
-                    span: 18,
-                  }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select weapon type",
-                    },
-                  ]}
-                >
-                  <Select placeholder="Please select a type weapon">
-                    <Select.Option value={0}>Sworld</Select.Option>
-                    <Select.Option value={1}>Magic</Select.Option>
-                    <Select.Option value={2}>Bow</Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row>
               <Col span={12}>
                 <Form.Item
                   label="Price"
@@ -282,111 +259,36 @@ function CreateWeapon({ web3 }) {
                   />
                 </Form.Item>
               </Col>
-              <Col span={12}>
-                <Form.Item
-                  label="Level"
-                  name={"weapon_level"}
-                  className="text-black font-bold"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select level",
-                    },
-                  ]}
-                >
-                  <InputNumber
-                    style={{
-                      width: 200,
-                    }}
-                    defaultValue="1"
-                    min="1"
-                    max="10"
-                    step="1"
-                    stringMode
-                  />
-                </Form.Item>
-              </Col>
             </Row>
-            <Form.Item label="Star" className="text-black font-bold" name={"weapon_rate"}>
-              <Rate onChange={setValue} value={value} count={3} />
-            </Form.Item>
-            <Col>
-              <p className="text-black font-bold text-3xl  mt-16">Stat Weapon</p>
-              <Divider style={{ marginTop: 0 }} />
-              <Form.Item label="Damage" name="weapon_damage" className="text-black font-bold">
-                <Slider defaultValue={100} max={1000} min={1} />
-              </Form.Item>
-              <Form.Item label="Speed" name="weapon_speed" className="text-black font-bold">
-                <Slider defaultValue={1.5} max={2} min={1} step={0.1} />
-              </Form.Item>
-              <Form.Item label="Duration" name="weapon_duration" className="text-black font-bold">
-                <Slider defaultValue={30} max={100} min={0} />
-              </Form.Item>
-              <Form.Item label="Critical" name="weapon_critical" className="text-black font-bold">
-                <Slider defaultValue={11} max={100} min={1} />
-              </Form.Item>
-            </Col>
 
             <Col>
               <Row align="middle" className="mt-16 mb-5">
-                <p className="text-black font-bold text-3xl mb-0 mr-5 mt-0">Abilities</p>
-                <PlusCircleFilled style={{ fontSize: "32px", color: "blue" }} onClick={onAddAbilities} />
+                <p className="text-black font-bold text-3xl mb-0 mr-5 mt-0">Item In Box</p>
               </Row>
 
               <Divider style={{ marginTop: 0 }} />
-              {abilities.map((item, index) => {
+              {itemsInBox.map((item, index) => {
                 return (
                   <Row>
-                    <Col span={4}>
-                      <Form.Item label="Image" className="text-black font-bold">
-                        <Upload
-                          maxCount={1}
-                          listType="picture-card"
-                          showUploadList={false}
-                          beforeUpload={beforeUpload}
-                          onChange={info => onChangeImgAbilities(info, index)}
-                        >
-                          {item.url ? (
-                            <img
-                              src={item.url}
-                              alt="avatar"
-                              style={{
-                                width: "100%",
-                              }}
-                            />
-                          ) : (
-                            uploadButton
-                          )}
-                        </Upload>
+                    <Col span={12}>
+                      <Form.Item label={index == 0 ? "Star" : " "} className="text-black font-bold">
+                        <Rate value={item.star} disabled count={item.star} />
                       </Form.Item>
                     </Col>
-                    <Col span={10}>
-                      <Form.Item label="Description" className="text-black font-bold" wrapperCol={{ span: 20 }}>
-                        <TextArea value={item.des} onChange={e => onChangeDesAbilities(e, index)} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                      <Form.Item label="Level" className="text-black font-bold">
+                    <Col span={12}>
+                      <Form.Item label={index == 0 ? "Percent" : " "} className="text-black font-bold">
                         <InputNumber
-                          style={{
-                            width: 200,
+                          defaultValue={0}
+                          value={item.percent ? item.percent : 0}
+                          min={0}
+                          max={100}
+                          formatter={value => `${value}%`}
+                          onChange={percent => {
+                            onChangePercentItemInBox(percent, index);
                           }}
-                          value={item.level ? item.level : 1}
-                          min="1"
-                          max="10"
-                          step="1"
-                          stringMode
-                          onChange={e => onChangeLevelAbilities(e, index)}
+                          parser={value => value.replace("%", "")}
                         />
                       </Form.Item>
-                    </Col>
-                    <Col span={2}>
-                      <div className="h-24 flex  justify-center items-center align-middle">
-                        <DeleteOutlined
-                          style={{ fontSize: "20px", color: "red" }}
-                          onClick={() => onRemoveAbilities(index)}
-                        />
-                      </div>
                     </Col>
                   </Row>
                 );

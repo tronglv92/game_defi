@@ -17,7 +17,7 @@ import React, { Component, useState } from "react";
 import Account from "../Account";
 import { Web3Consumer } from "../../helpers/Web3Context";
 import { useRouter } from "next/router";
-import { ADMIN_WEAPON_PATH, HOME_PATH } from "../../constants/path";
+import { ADMIN_WEAPON_PATH, HOME_PATH, ADMIN_BOX_PATH } from "../../constants/path";
 function getItem(label, key, icon, children) {
   return {
     key,
@@ -29,11 +29,13 @@ function getItem(label, key, icon, children) {
 const MENU_KEY = {
   Home: "Home",
   Weapon: "Weapon",
+  Box: "Box",
   User: "User",
 };
 const items = [
   getItem("Home", MENU_KEY.Home, <PieChartOutlined />),
   getItem("Weapon", MENU_KEY.Weapon, <PieChartOutlined />),
+  getItem("Box", MENU_KEY.Box, <PieChartOutlined />),
   getItem("User", MENU_KEY.User, <UserOutlined />, [getItem("Tom", "Tom")]),
   // getItem("User", "sub1", <UserOutlined />, [getItem("Tom", "3"), getItem("Bill", "4"), getItem("Alex", "5")]),
   // getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "6"), getItem("Team 2", "8")]),
@@ -73,6 +75,11 @@ function LayoutView({ children, web3 }) {
       case MENU_KEY.Weapon:
         router.push({
           pathname: ADMIN_WEAPON_PATH,
+        });
+        break;
+      case MENU_KEY.Box:
+        router.push({
+          pathname: ADMIN_BOX_PATH,
         });
         break;
       default:
@@ -140,6 +147,7 @@ function LayoutView({ children, web3 }) {
           />
         </Sider>
         <Layout>
+          {/* HEADDER */}
           <Header
             className="flex flex-row justify-between items-center"
             style={{ padding: 0, paddingLeft: 15, paddingRight: 15, position: "sticky", top: 0, zIndex: 1000 }}
@@ -168,6 +176,7 @@ function LayoutView({ children, web3 }) {
               onLogout={logoutOfWeb3Modal}
             />
           </Header>
+          {/* BODY */}
           <Content
             style={{
               margin: "0 16px",

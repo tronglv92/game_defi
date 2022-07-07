@@ -11,6 +11,7 @@ import { POLLING_INTERVAL } from "../helpers/connectors";
 import Layout from "../components/Layout/LayoutView";
 import { useRouter } from "next/router";
 import { MARKETING_PATH } from "../constants/path";
+import { wrapper } from "../store/store";
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const prevTheme = useRef("light");
@@ -57,5 +58,4 @@ function MyApp({ Component, pageProps }) {
     </Web3ReactProvider>
   );
 }
-
-export default MyApp;
+export default wrapper.withRedux(MyApp);

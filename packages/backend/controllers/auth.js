@@ -8,10 +8,12 @@ const User = require("../models/user.model");
 exports.create = (req, res, next) => {
   const { signature, publicAddress } = req.body;
 
-  if (!signature || !publicAddress)
-    return res
-      .status(400)
-      .send({ error: "Request should have signature and publicAddress" });
+  if (!signature || !publicAddress) {
+    const error = new Error("Request should have signature and publicAddress");
+    error.statusCode = 400;
+    throw error;
+  }
+
   return (
     User.findOne({ where: { publicAddress } })
       ////////////////////////////////////////////////////
@@ -19,10 +21,11 @@ exports.create = (req, res, next) => {
       ////////////////////////////////////////////////////
       .then((user) => {
         if (!user) {
-          res.status(401).send({
-            error: `User with publicAddress ${publicAddress} is not found in database`,
-          });
-          return null;
+          const error = new Error(
+            `User with publicAddress ${publicAddress} is not found in database`
+          );
+          error.statusCode = 401;
+          throw error;
         }
         return user;
       })
@@ -43,10 +46,9 @@ exports.create = (req, res, next) => {
         if (address.toLowerCase() === publicAddress.toLowerCase()) {
           return user;
         } else {
-          res.status(401).send({
-            error: "Signature verification failed",
-          });
-          return null;
+          const error = new Error(`Signature verification failed`);
+          error.statusCode = 401;
+          throw error;
         }
       })
       .then((user) => {
@@ -67,7 +69,9 @@ exports.create = (req, res, next) => {
           }
         );
         if (!token) {
-          return res.status(400).send({ error: "Token is null" });
+          const error = new Error(`Token is null`);
+          error.statusCode = 400;
+          throw error;
         }
         return res.status(200).send({ token });
       })
