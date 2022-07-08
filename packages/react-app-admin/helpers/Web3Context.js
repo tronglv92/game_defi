@@ -230,9 +230,6 @@ export function Web3Provider({ children, ...props }) {
 
       await activate(wallet.connector, undefined, true);
 
-      console.log("onLogin account ", account);
-      console.log("onLogin library ", library);
-
       // localStorage.setItem("isWalletConnected", true);
     } catch (ex) {
       const msgError = getErrorMessage(ex);

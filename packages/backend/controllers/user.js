@@ -1,6 +1,8 @@
 const User = require("../models/user.model");
-
-exports.find = (req, res, next) => {
+const catchAsync = require("../utils/catchAsync");
+const ApiSuccess = require("../utils/ApiSuccess");
+const ApiError = require("../utils/ApiError");
+exports.find = catchAsync(async (req, res, next) => {
   // If a query string ?publicAddress=... is given, then filter results
 
   const whereClause =
@@ -11,44 +13,26 @@ exports.find = (req, res, next) => {
           },
         }
       : undefined;
-  return User.findAll(whereClause)
-    .then((users) => res.json(users))
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
-    });
-};
-exports.get = (req, res, next) => {
+  const users = await User.findAll(whereClause);
+  const data = { users };
+  return ApiSuccess(res, data);
+});
+exports.get = catchAsync(async (req, res, next) => {
   // AccessToken payload is in req.user.payload, especially its `id` field
   // UserId is the param in /users/:userId
   // We only allow user accessing herself, i.e. require payload.id==userId
   console.log("req ", req.params);
   if (req.userId !== req.params.userId) {
-    const error = new Error("You can can only access yourself");
-    error.statusCode = 401;
-    throw error;
+    throw ApiError(401, "You can can only access yourself");
   }
-  return User.findByPk(req.params.userId)
-    .then((user) => res.json(user))
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
-    });
-};
-exports.createUser = (req, res, next) => {
-  return User.create(req.body)
-    .then((user) => res.json(user))
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
-    });
-};
+  const user = await User.findByPk(req.params.userId);
+
+  return ApiSuccess(res, { user });
+});
+exports.createUser = catchAsync(async (req, res, next) => {
+  const user = await User.create(req.body);
+  return ApiSuccess(res, { user });
+});
 exports.patch = (req, res, next) => {
   // Only allow to fetch current user
   if (req.userId !== req.params.userId) {

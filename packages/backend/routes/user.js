@@ -19,6 +19,6 @@ userRouter.post("/", controller.createUser);
 
 /** PATCH /api/users/:userId */
 /** Authenticated route */
-userRouter.patch("/:userId", isAuth, controller.patch);
+// userRouter.patch("/:userId", isAuth, controller.patch);
 
 module.exports = userRouter;

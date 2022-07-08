@@ -8,7 +8,7 @@ weaponRouter.post(
   "/createWeapon",
   // isAuth,
   [
-    body("img", "Please enter url imge").trim().not().isEmpty(),
+    body("img", "Please enter url imge").trim().isURL(),
     body("name", "Please enter name").trim().not().isEmpty(),
     body("price", "Price must be a number").trim().isNumeric(),
     body("type", "Type must be a number").trim().isNumeric(),

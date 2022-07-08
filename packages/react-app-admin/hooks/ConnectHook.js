@@ -60,10 +60,11 @@ export function useEagerConnectLogin(props) {
       ]);
       return { publicAddress, signature };
     } catch (err) {
+      console.log("handleSignMessage err ", err);
       throw new Error("You need to sign the message to be able to log in.");
     }
   };
-  const handleSignup = publicAddress => {
+  const handleCreateUser = publicAddress => {
     console.log("JSON.stringify({ publicAddress }) ", JSON.stringify({ publicAddress }));
     return fetch(`${process.env.REACT_APP_BACKEND_URL}/users`, {
       body: JSON.stringify({ publicAddress }),
@@ -73,23 +74,28 @@ export function useEagerConnectLogin(props) {
       method: "POST",
     }).then(response => response.json());
   };
-  const signatureLogin = async () => {
-    console.log("walletIdSelected ", walletIdSelected);
+  const handlerLogin = async () => {
     if (account) {
       setYourAccount(null);
       const publicAddress = account.toLowerCase();
+      console.log("publicAddress ", publicAddress);
+      //check user is exits
       try {
-        const users = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users?publicAddress=${publicAddress}`).then(
-          response => response.json(),
-        );
+        const resultFindUser = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/users?publicAddress=${publicAddress}`,
+        ).then(response => response.json());
+        console.log("users ", resultFindUser);
+        const users = resultFindUser.data.users;
+
         // If yes, retrieve it. If no, create it.
         let user;
         if (users.length > 0) {
           user = users[0];
         } else {
-          user = await handleSignup(publicAddress);
+          user = await handleCreateUser(publicAddress);
         }
         const resultSign = await handleSignMessage(user);
+        console.log("resultSign ", resultSign);
         const auth = await handleAuthenticate(resultSign);
         // onLogin(auth);
         auth.publicAddress = publicAddress;
@@ -99,12 +105,16 @@ export function useEagerConnectLogin(props) {
         setState({ auth });
         setYourAccount(account);
       } catch (ex) {
-        deactivate();
         notification.error({
           message: "Login Error",
           description: ex.message,
         });
       }
+    } else {
+      notification.error({
+        message: "Login Error",
+        description: "Missing account",
+      });
     }
   };
   useEffect(() => {
@@ -126,7 +136,7 @@ export function useEagerConnectLogin(props) {
           if (publicAddress && publicAddress != account.toLocaleLowerCase()) {
             console.log("Vao trong 1");
 
-            signatureLogin();
+            handlerLogin();
           } else {
             console.log("Vao trong 2");
             setYourAccount(account);
@@ -135,7 +145,7 @@ export function useEagerConnectLogin(props) {
         // User just logged in after logout or fisttime log in
         else {
           console.log("Vao trong 3");
-          signatureLogin();
+          handlerLogin();
         }
       }
       // User logout , clear account
