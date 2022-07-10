@@ -3,7 +3,7 @@ import metamask from "../images/metamask.svg";
 import coinbase_wallet from "../images/coinbase_wallet.svg";
 import wallet_connect from "../images/wallet_connect.svg";
 import close from "../images/close.svg";
-import { connectorsByName } from "../helpers/connectors";
+import { connectorsByName } from "../helpers/connectAccount/connectors";
 
 // displays a page header
 

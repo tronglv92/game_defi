@@ -1,4 +1,4 @@
-import { Web3Consumer } from "../../helpers/Web3Context";
+import { Web3Consumer } from "../../helpers/connectAccount/Web3Context";
 import React, { useContext, useState } from "react";
 import { useContractReader } from "eth-hooks";
 import {
@@ -22,6 +22,10 @@ import {
 import UploadImage from "../../components/UploadImage";
 import TextArea from "antd/lib/input/TextArea";
 import { DeleteOutlined, LoadingOutlined, PlusCircleFilled, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import { useSelector, useDispatch } from "react-redux";
+import { createWeapon } from "../../store/weapon/weaponSlice";
+import { uploadMultiple } from "../../store/upload/uploadSlice";
+import axios from "axios";
 const getBase64 = (img, callback) => {
   const reader = new FileReader();
   reader.addEventListener("load", () => callback(reader.result));
@@ -45,40 +49,105 @@ const beforeUpload = file => {
 
 function CreateWeapon({ web3 }) {
   const [value, setValue] = useState(3);
-  const [abilities, setAbilities] = useState([{ img: null, des: null, level: null, url: null }]);
-  const [itemsInBox, setItemInBox] = useState([
-    { star: 1, percent: null },
-    { star: 2, percent: null },
-    { star: 3, percent: null },
-  ]);
+  const [abilities, setAbilities] = useState([]);
+
   const [imageUrlWeapon, setImageUrlWeapon] = useState();
 
   const [loadingWeapon, setLoadingWeapon] = useState(false);
 
+  const dispatch = useDispatch();
+  // const counter = useSelector(state => state.counter.count);
+
   const onFinish = info => {
-    info.abilities = abilities;
-    info.itemsInBox = itemsInBox;
     console.log("info ", info);
-    let sumPercent = 0;
-    for (let i = 0; i < itemsInBox.length; i++) {
-      let percent = itemsInBox[i].percent;
+    console.log("abilities ", abilities);
+    // let imgs = [];
+    // if (info.img[0]) {
+    //   imgs.push(info.img[0].originFileObj);
+    // }
 
-      if (percent != null) {
-        sumPercent += percent;
-      }
-    }
+    // for (let i = 0; i < abilities.length; i++) {
+    //   let item = abilities[i];
+    //   if (item.img && item.img.length > 0) {
+    //     imgs.push(item.img[0].originFileObj);
+    //   }
+    // }
 
-    if (info.is_box == true && sumPercent != 100) {
-      notification.error({
-        message: "Add Product",
-        description: "Sum percent item in box must be 100 ",
-      });
-      return;
-    }
+    // dispatch(
+    //   uploadMultiple({
+    //     imgs,
+    //     onSuccess: data => {
+    //       console.log("uploadMultiple data ", data);
+    //       if (data) {
+    //         const { images } = data;
+    //         let indexImgWeapon = images.findIndex(e => e.originalName == info.img[0].originFileObj.name);
+    //         if (indexImgWeapon == -1) {
+    //           return;
+    //         }
+    //         let abilitiesResult = [];
+    //         for (let i = 0; i < abilities.length; i++) {
+    //           let item = abilities[i];
+    //           let index = images.findIndex(
+    //             e => item.img && item.img.length > 0 && e.originalName == item.img[0].originFileObj.name,
+    //           );
+
+    //           if (index != -1) {
+    //             abilitiesResult.push({ ...item, img: images[index].url });
+    //           }
+    //         }
+
+    //         const weapon = {
+    //           img: images[indexImgWeapon].url,
+    //           name: info.name,
+    //           type: info.type,
+    //           level: info.level,
+    //           star: info.star,
+    //           price: info.price,
+    //           stat: {
+    //             damage: parseFloat(info.damage),
+    //             speed: parseFloat(info.speed),
+    //             hp: parseFloat(info.hp),
+    //             critical: parseFloat(info.critical),
+    //           },
+    //           abilities: abilitiesResult,
+    //         };
+    //         console.log("uploadMultiple weapon ", weapon);
+    //         dispatch(
+    //           createWeapon({
+    //             weapon,
+    //             onSuccess: dataWp => {
+    //               console.log("uploadMultiple dataWp ", dataWp);
+    //             },
+    //             onError: err => {
+    //               console.log("createWeapon err ", err);
+    //               notification.error({
+    //                 message: "Message",
+    //                 description: err,
+    //               });
+    //             },
+    //           }),
+    //         );
+    //       } else {
+    //         notification.error({
+    //           message: "Message",
+    //           description: "Missing data when upload images",
+    //         });
+    //       }
+    //     },
+    //     onError: err => {
+    //       console.log("uploadMultiple err ", err);
+    //       notification.error({
+    //         message: "Message",
+    //         description: err,
+    //       });
+    //     },
+    //   }),
+    // );
   };
+
   const onAddAbilities = () => {
     let abilitiesClone = [...abilities];
-    abilitiesClone.push({ img: null, des: null, level: null });
+    abilitiesClone.push({ img: null, description: null, level: null, name: null });
     console.log("abilitiesClone ", abilitiesClone);
     setAbilities(abilitiesClone);
   };
@@ -100,7 +169,7 @@ function CreateWeapon({ web3 }) {
         setImageUrlWeapon(url);
       });
     } else if (info.file.status === "error") {
-      console.log(i`${info.file.name} file upload failed.`);
+      console.log(`${info.file.name} file upload failed.`);
     }
     if (Array.isArray(info)) {
       return info;
@@ -108,10 +177,16 @@ function CreateWeapon({ web3 }) {
 
     return info?.fileList;
   };
+  const onChangeName = (e, index) => {
+    console.log("target ", e);
+    let abilitiesClone = [...abilities];
+    abilitiesClone[index].name = e.target.value;
+    setAbilities(abilitiesClone);
+  };
   const onChangeDesAbilities = (e, index) => {
     console.log("target ", e);
     let abilitiesClone = [...abilities];
-    abilitiesClone[index].des = e.target.value;
+    abilitiesClone[index].description = e.target.value;
     setAbilities(abilitiesClone);
   };
   const onChangeLevelAbilities = (level, index) => {
@@ -136,11 +211,7 @@ function CreateWeapon({ web3 }) {
       console.log(i`${info.file.name} file upload failed.`);
     }
   };
-  const onChangePercentItemInBox = (percent, index) => {
-    let itemsInBoxClone = [...itemsInBox];
-    itemsInBoxClone[index].percent = percent;
-    setItemInBox(itemsInBoxClone);
-  };
+
   const uploadButton = (
     <div>
       {loadingWeapon ? <LoadingOutlined /> : <PlusOutlined />}
@@ -161,13 +232,13 @@ function CreateWeapon({ web3 }) {
           <Form
             layout="vertical"
             initialValues={{
-              weapon_rate: 1,
-              weapon_level: 1,
-              weapon_price: 1,
-              weapon_damage: 111,
-              weapon_speed: 1.1,
-              weapon_duration: 100,
-              weapon_critical: 55,
+              star: 1,
+              level: 1,
+              price: 1,
+              damage: 111,
+              speed: 1.1,
+              hp: 100,
+              critical: 55,
             }}
             onFinish={onFinish}
           >
@@ -180,7 +251,7 @@ function CreateWeapon({ web3 }) {
             <Divider style={{ marginTop: 0 }} />
             <div className="mt-16 mb-16">
               <Form.Item
-                name="weapon_img"
+                name="img"
                 label="Image"
                 valuePropName="fileList"
                 getValueFromEvent={uploadImgWeapon}
@@ -204,7 +275,10 @@ function CreateWeapon({ web3 }) {
                       src={imageUrlWeapon}
                       alt="avatar"
                       style={{
-                        width: "100%",
+                        height: "100px",
+                        width: "100px",
+
+                        objectFit: "contain",
                       }}
                     />
                   ) : (
@@ -217,7 +291,7 @@ function CreateWeapon({ web3 }) {
               <Col span={12}>
                 <Form.Item
                   label="Name"
-                  name="weapon_name"
+                  name="name"
                   className="text-black font-bold"
                   wrapperCol={{
                     span: 18,
@@ -235,7 +309,7 @@ function CreateWeapon({ web3 }) {
               <Col span={12}>
                 <Form.Item
                   label="Type"
-                  name={"weapon_type"}
+                  name={"type"}
                   className="text-black font-bold"
                   wrapperCol={{
                     span: 18,
@@ -259,7 +333,7 @@ function CreateWeapon({ web3 }) {
               <Col span={12}>
                 <Form.Item
                   label="Price"
-                  name={"weapon_price"}
+                  name={"price"}
                   className="text-black font-bold"
                   rules={[
                     {
@@ -285,7 +359,7 @@ function CreateWeapon({ web3 }) {
               <Col span={12}>
                 <Form.Item
                   label="Level"
-                  name={"weapon_level"}
+                  name={"level"}
                   className="text-black font-bold"
                   rules={[
                     {
@@ -307,23 +381,86 @@ function CreateWeapon({ web3 }) {
                 </Form.Item>
               </Col>
             </Row>
-            <Form.Item label="Star" className="text-black font-bold" name={"weapon_rate"}>
+            <Form.Item label="Star" className="text-black font-bold" name={"star"}>
               <Rate onChange={setValue} value={value} count={3} />
             </Form.Item>
             <Col>
               <p className="text-black font-bold text-3xl  mt-16">Stat Weapon</p>
               <Divider style={{ marginTop: 0 }} />
-              <Form.Item label="Damage" name="weapon_damage" className="text-black font-bold">
-                <Slider defaultValue={100} max={1000} min={1} />
+              <Form.Item
+                label="Damage"
+                name="damage"
+                className="text-black font-bold"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter damage",
+                  },
+                ]}
+              >
+                <InputNumber
+                  style={{
+                    width: 200,
+                  }}
+                  stringMode
+                />
+                {/* <Slider defaultValue={100} max={1000} min={1} /> */}
               </Form.Item>
-              <Form.Item label="Speed" name="weapon_speed" className="text-black font-bold">
-                <Slider defaultValue={1.5} max={2} min={1} step={0.1} />
+              <Form.Item
+                label="Speed"
+                name="speed"
+                className="text-black font-bold"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter speed",
+                  },
+                ]}
+              >
+                <InputNumber
+                  style={{
+                    width: 200,
+                  }}
+                  stringMode
+                />
               </Form.Item>
-              <Form.Item label="Duration" name="weapon_duration" className="text-black font-bold">
-                <Slider defaultValue={30} max={100} min={0} />
+              <Form.Item
+                label="HP"
+                name="hp"
+                className="text-black font-bold"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter hp",
+                  },
+                ]}
+              >
+                <InputNumber
+                  style={{
+                    width: 200,
+                  }}
+                  stringMode
+                />
+                {/* <Slider defaultValue={30} max={100} min={0} /> */}
               </Form.Item>
-              <Form.Item label="Critical" name="weapon_critical" className="text-black font-bold">
-                <Slider defaultValue={11} max={100} min={1} />
+              <Form.Item
+                label="Critical"
+                name="critical"
+                className="text-black font-bold"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter critical",
+                  },
+                ]}
+              >
+                <InputNumber
+                  style={{
+                    width: 200,
+                  }}
+                  stringMode
+                />
+                {/* <Slider defaultValue={11} max={100} min={1} /> */}
               </Form.Item>
             </Col>
 
@@ -338,7 +475,16 @@ function CreateWeapon({ web3 }) {
                 return (
                   <Row>
                     <Col span={4}>
-                      <Form.Item label="Image" className="text-black font-bold">
+                      <Form.Item
+                        label="Image"
+                        className="text-black font-bold"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please upload ability image!",
+                          },
+                        ]}
+                      >
                         <Upload
                           maxCount={1}
                           listType="picture-card"
@@ -351,7 +497,10 @@ function CreateWeapon({ web3 }) {
                               src={item.url}
                               alt="avatar"
                               style={{
-                                width: "100%",
+                                height: "100px",
+                                width: "100px",
+
+                                objectFit: "contain",
                               }}
                             />
                           ) : (
@@ -361,12 +510,44 @@ function CreateWeapon({ web3 }) {
                       </Form.Item>
                     </Col>
                     <Col span={10}>
-                      <Form.Item label="Description" className="text-black font-bold" wrapperCol={{ span: 20 }}>
+                      <Form.Item
+                        label="Name"
+                        className="text-black font-bold"
+                        wrapperCol={{ span: 20 }}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter name",
+                          },
+                        ]}
+                      >
+                        <Input value={item.name} onChange={e => onChangeName(e, index)} />
+                      </Form.Item>
+                      <Form.Item
+                        label="Description"
+                        className="text-black font-bold"
+                        wrapperCol={{ span: 20 }}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter description",
+                          },
+                        ]}
+                      >
                         <TextArea value={item.des} onChange={e => onChangeDesAbilities(e, index)} />
                       </Form.Item>
                     </Col>
                     <Col span={8}>
-                      <Form.Item label="Level" className="text-black font-bold">
+                      <Form.Item
+                        label="Level"
+                        className="text-black font-bold"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter level",
+                          },
+                        ]}
+                      >
                         <InputNumber
                           style={{
                             width: 200,
@@ -392,6 +573,11 @@ function CreateWeapon({ web3 }) {
                 );
               })}
             </Col>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Create
+              </Button>
+            </Form.Item>
           </Form>
         </div>
       </Card>

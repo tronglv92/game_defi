@@ -1,4 +1,4 @@
-import { Web3Consumer } from "../../helpers/Web3Context";
+import { Web3Consumer } from "../../helpers/connectAccount/Web3Context";
 import React, { useContext, useState } from "react";
 import { useContractReader } from "eth-hooks";
 import {

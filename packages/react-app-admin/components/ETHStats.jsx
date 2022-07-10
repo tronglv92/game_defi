@@ -2,7 +2,7 @@ import React from "react";
 import { Row, Col } from "antd";
 import { Ramp, GasGauge } from ".";
 import { NETWORKS } from "../constants";
-import { Web3Consumer } from "../helpers/Web3Context";
+import { Web3Consumer } from "../helpers/connectAccount/Web3Context";
 
 function ETHStats({ web3 }) {
   return (

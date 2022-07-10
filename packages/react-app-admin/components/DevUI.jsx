@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Row, Col } from "antd";
 import { Faucet, Ramp, GasGauge } from ".";
 import { NETWORKS } from "../constants";
-import { Web3Consumer } from "../helpers/Web3Context";
+import { Web3Consumer } from "../helpers/connectAccount/Web3Context";
 
 // todo : Extend to include available contracts on current chain
 

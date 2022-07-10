@@ -15,7 +15,7 @@ import ModalNetworkDisplay from "../ModalNetworkDisplay";
 
 import React, { Component, useState } from "react";
 import Account from "../Account";
-import { Web3Consumer } from "../../helpers/Web3Context";
+import { Web3Consumer } from "../../helpers/connectAccount/Web3Context";
 import { useRouter } from "next/router";
 import { ADMIN_WEAPON_PATH, HOME_PATH, ADMIN_BOX_PATH } from "../../constants/path";
 function getItem(label, key, icon, children) {
@@ -32,15 +32,7 @@ const MENU_KEY = {
   Box: "Box",
   User: "User",
 };
-const items = [
-  getItem("Home", MENU_KEY.Home, <PieChartOutlined />),
-  getItem("Weapon", MENU_KEY.Weapon, <PieChartOutlined />),
-  getItem("Box", MENU_KEY.Box, <PieChartOutlined />),
-  getItem("User", MENU_KEY.User, <UserOutlined />, [getItem("Tom", "Tom")]),
-  // getItem("User", "sub1", <UserOutlined />, [getItem("Tom", "3"), getItem("Bill", "4"), getItem("Alex", "5")]),
-  // getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "6"), getItem("Team 2", "8")]),
-  // getItem("Files", "9", <FileOutlined />),
-];
+
 const { Header, Content, Footer, Sider } = Layout;
 function LayoutView({ children, web3 }) {
   const router = useRouter();
@@ -55,11 +47,22 @@ function LayoutView({ children, web3 }) {
     loginCryto,
     library,
     walletIdSelected,
+    yourAccount,
   } = web3;
   const defaultSelectedKeys = [MENU_KEY.Home];
   const [collapsed, setCollapsed] = useState(false);
   const [breadcrums, setBreadCrums] = useState(defaultSelectedKeys);
   const [selectedMenuKeys, setSelectedMenuKeys] = useState(defaultSelectedKeys);
+
+  const items = [
+    getItem("Home", MENU_KEY.Home, <PieChartOutlined />),
+    yourAccount && getItem("Weapon", MENU_KEY.Weapon, <PieChartOutlined />),
+    yourAccount && getItem("Box", MENU_KEY.Box, <PieChartOutlined />),
+    yourAccount && getItem("User", MENU_KEY.User, <UserOutlined />, [getItem("Tom", "Tom")]),
+    // getItem("User", "sub1", <UserOutlined />, [getItem("Tom", "3"), getItem("Bill", "4"), getItem("Alex", "5")]),
+    // getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "6"), getItem("Team 2", "8")]),
+    // getItem("Files", "9", <FileOutlined />),
+  ];
   const onSelectedMenu = menu => {
     setBreadCrums(menu.keyPath);
     setSelectedMenuKeys(menu.keyPath);

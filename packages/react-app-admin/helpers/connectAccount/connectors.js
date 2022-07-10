@@ -5,10 +5,10 @@ import {
 } from "@web3-react/injected-connector";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import { WalletLinkConnector } from "@web3-react/walletlink-connector";
-import { WalletId } from "../constants/key";
-import metamask from "../images/metamask.svg";
-import coinbase_wallet from "../images/coinbase_wallet.svg";
-import wallet_connect from "../images/wallet_connect.svg";
+import { WalletId } from "../../constants/key";
+import metamask from "../../images/metamask.svg";
+import coinbase_wallet from "../../images/coinbase_wallet.svg";
+import wallet_connect from "../../images/wallet_connect.svg";
 import { UnsupportedChainIdError } from "@web3-react/core";
 
 import { UserRejectedRequestError as UserRejectedRequestErrorWalletConnect } from "@web3-react/walletconnect-connector";

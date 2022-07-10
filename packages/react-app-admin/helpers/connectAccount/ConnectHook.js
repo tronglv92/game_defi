@@ -1,8 +1,8 @@
 import { useWeb3React } from "@web3-react/core";
-import { activateInjectedProvider, getErrorMessage, getWalletById } from "../helpers/connectors";
-import { getLocal, setLocal } from "../helpers/local";
+import { activateInjectedProvider, getErrorMessage, getWalletById } from "./connectors";
+import { getLocal, setLocal } from "../local";
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { LS_KEY } from "../constants/key";
+import { LS_KEY } from "../../constants/key";
 import { notification } from "antd";
 export function useEagerConnectLogin(props) {
   const { walletId, localChainId, setShowModalDisplayNetWork } = props;
@@ -92,11 +92,13 @@ export function useEagerConnectLogin(props) {
         if (users.length > 0) {
           user = users[0];
         } else {
-          user = await handleCreateUser(publicAddress);
+          const resultCreate = await handleCreateUser(publicAddress);
+          user = resultCreate.data;
         }
         const resultSign = await handleSignMessage(user);
         console.log("resultSign ", resultSign);
-        const auth = await handleAuthenticate(resultSign);
+        const resultAuth = await handleAuthenticate(resultSign);
+        const auth = resultAuth.data;
         // onLogin(auth);
         auth.publicAddress = publicAddress;
         if (walletIdSelected != null) auth.walletId = walletIdSelected;
@@ -105,6 +107,7 @@ export function useEagerConnectLogin(props) {
         setState({ auth });
         setYourAccount(account);
       } catch (ex) {
+        deactivate();
         notification.error({
           message: "Login Error",
           description: ex.message,
@@ -124,9 +127,6 @@ export function useEagerConnectLogin(props) {
     connectWalletOnPageLoad();
   }, []); // intentionally only running on mount (make sure it's only mounted once :))
   useEffect(() => {
-    console.log("CHANGE ACCOUNT ", account);
-    console.log("CHANGE AUTH ", state.auth);
-
     if (isNetworkSelected(chainId) == true) {
       if (account) {
         // User logged in, check account and auth in local is same

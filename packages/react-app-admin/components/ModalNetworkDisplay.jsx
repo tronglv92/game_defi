@@ -1,7 +1,5 @@
 import React from "react";
 
-import close from "../images/close.svg";
-import { connectorsByName } from "../helpers/connectors";
 import { useTheme } from "next-themes";
 import { WalletId } from "../constants/key";
 // displays a page header

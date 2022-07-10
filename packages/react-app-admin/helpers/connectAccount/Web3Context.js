@@ -5,24 +5,24 @@ import { Alert, Button, notification } from "antd";
 import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState, useRef, useMemo } from "react";
 
-import { INFURA_ID, NETWORKS, ALCHEMY_KEY, NETWORK } from "../constants";
-import { Transactor } from "../helpers";
+import { INFURA_ID, NETWORKS, ALCHEMY_KEY, NETWORK } from "../../constants";
+import { Transactor } from "..";
 import { useContractLoader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 
 // contracts
-import deployedContracts from "../contracts/hardhat_contracts.json";
-import externalContracts from "../contracts/external_contracts";
-import { activateInjectedProvider, getErrorMessage, getWalletById, injected } from "../helpers/connectors";
+import deployedContracts from "../../contracts/hardhat_contracts.json";
+import externalContracts from "../../contracts/external_contracts";
+import { activateInjectedProvider, getErrorMessage, getWalletById, injected } from "./connectors";
 import { useWeb3React } from "@web3-react/core";
 
-import { getLocal, setLocal } from "./local";
-import { AUTH_LOCAL_ID, LS_KEY, METAMASK_ID } from "../constants/key";
+import { getLocal, setLocal } from "../local";
+import { AUTH_LOCAL_ID, LS_KEY, METAMASK_ID } from "../../constants/key";
 
-import { useBalance } from "../hooks/useBalance";
+import { useBalance } from "../../hooks/useBalance";
 import lib from "@ant-design/icons";
 import _ from "lodash";
-import { useEagerConnectLogin } from "../hooks/ConnectHook";
+import { useEagerConnectLogin } from "./ConnectHook";
 const { ethers, BigNumber } = require("ethers");
 
 // create our app context
@@ -242,12 +242,6 @@ export function Web3Provider({ children, ...props }) {
     setShowModalLogin(false);
   };
   const logoutOfWeb3Modal = async () => {
-    // await web3Modal.clearCachedProvider();
-    // if (injectedProvider && injectedProvider.provider && typeof injectedProvider.provider.disconnect == "function") {
-    //   await injectedProvider.provider.disconnect();
-    // }
-
-    // logoutAccount();
     deactivate();
   };
   // const triedEager = useEagerConnect();

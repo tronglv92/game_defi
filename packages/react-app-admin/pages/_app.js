@@ -1,14 +1,14 @@
 import "../styles/index.css";
 import "antd/dist/antd.css";
 import React, { useEffect, useRef } from "react";
-import { Web3Provider as Web3ContextProvider } from "../helpers/Web3Context";
+import { Web3Provider as Web3ContextProvider } from "../helpers/connectAccount/Web3Context";
 import { Web3ReactProvider } from "@web3-react/core";
 import { DevUI, NetworkDisplay, ThemeSwitch } from "../components";
 import { ThemeProvider } from "next-themes";
 import Head from "next/head";
 import { ethers } from "ethers";
-import { POLLING_INTERVAL } from "../helpers/connectors";
-
+import { POLLING_INTERVAL } from "../helpers/connectAccount/connectors";
+import { wrapper } from "../store/store";
 import LayoutView from "../components/Layout/LayoutView";
 
 function MyApp({ Component, pageProps }) {
@@ -53,4 +53,4 @@ function MyApp({ Component, pageProps }) {
   );
 }
 
-export default MyApp;
+export default wrapper.withRedux(MyApp);

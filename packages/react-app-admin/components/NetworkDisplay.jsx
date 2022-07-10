@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, Button } from "antd";
 import { NETWORK } from "../constants";
-import { Web3Consumer } from "../helpers/Web3Context";
+import { Web3Consumer } from "../helpers/connectAccount/Web3Context";
 
 function NetworkDisplay({ web3 }) {
   const { NETWORKCHECK, localChainId, selectedChainId, targetNetwork } = web3;

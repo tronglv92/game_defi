@@ -6,7 +6,8 @@ const catchAsync = require("../utils/catchAsync");
 const ApiError = require("../utils/ApiError");
 
 const AWS = require("aws-sdk");
-const { nanoid } = require("nanoid");
+const { v4: uuidv4 } = require("uuid");
+
 const multerS3 = require("multer-s3");
 const multer = require("multer");
 var path = require("path");
@@ -28,7 +29,7 @@ const imgSingleUpload = multer({
     bucket: config.BUCKET,
     // acl: "public-read",
     key: function (req, file, cb) {
-      const filePath = `items/${nanoid()}.png`;
+      const filePath = `items/${uuidv4()}.png`;
       let key = path.join(`${config.BUCKET_BASE_FOLDER}`, filePath);
       cb(null, key);
     },
@@ -108,9 +109,7 @@ const uploadMultipleImages = multer({
     key: function (req, file, cb) {
       const timeNow = format(new Date(), "ddMMyyyyHHmm");
       const fileType = file.mimetype.split("/")[1] || "png";
-      const filePath = `${req.userId}/${
-        req.userId
-      }_${timeNow}_${nanoid()}.${fileType}`;
+      const filePath = `${timeNow}_${uuidv4()}.${fileType}`;
       let key = path.join(`${config.BUCKET_BASE_FOLDER}`, filePath);
       cb(
         null,
@@ -154,7 +153,7 @@ exports.uploadMultipleFileToS3 = catchAsync(async (req, res) => {
           galleryImgLocationArray.push({
             originalName: fileArray[i].originalname,
             key: fileArray[i].key,
-            url: `https://data-service.pharmacity.io/${fileArray[i].key}`,
+            url: `https://created-by-api.s3.ap-southeast-1.amazonaws.com/${fileArray[i].key}`,
           });
         }
         // Save the file name into database
