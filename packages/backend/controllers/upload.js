@@ -27,7 +27,7 @@ const imgSingleUpload = multer({
   storage: multerS3({
     s3: s3,
     bucket: config.BUCKET,
-    // acl: "public-read",
+    acl: "public-read",
     key: function (req, file, cb) {
       const filePath = `items/${uuidv4()}.png`;
       let key = path.join(`${config.BUCKET_BASE_FOLDER}`, filePath);
@@ -105,7 +105,7 @@ const uploadMultipleImages = multer({
     contentType: multerS3.AUTO_CONTENT_TYPE,
     // contentEncoding: "gzip",
     // contentType: "image/png",
-    // acl: "public-read",
+    acl: "public-read",
     key: function (req, file, cb) {
       const timeNow = format(new Date(), "ddMMyyyyHHmm");
       const fileType = file.mimetype.split("/")[1] || "png";

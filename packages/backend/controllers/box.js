@@ -2,35 +2,15 @@ const NFT = require("../models/nft");
 const NftItem = require("../models/nft_item");
 const { validationResult } = require("express-validator/check");
 
-const BoxState = require("../models/box_state");
 const catchAsync = require("../utils/catchAsync");
 const ApiSuccess = require("../utils/ApiSuccess");
 const ApiError = require("../utils/ApiError");
-exports.getBox = catchAsync(async (req, res, next) => {
-  const currentPage = req.query.page || 1;
-  const perPage = req.query.limit || 2;
+const ItemInBox = require("../models/item_in_box");
+const httpStatus = require("http-status");
+const pick = require("../utils/pick");
+const getDelta = require("../utils/delta");
+const sequelize = require("../helper/db");
 
-  const items = await NftItem.findAndCountAll({
-    // where: {...},
-    // order: [...],
-    include: [
-      {
-        model: BoxState,
-        // where: {
-        //   speed: 1.04,
-        // },
-      },
-      {
-        model: NFT,
-      },
-    ],
-    limit: parseInt(perPage),
-    offset: parseInt((currentPage - 1) * perPage),
-    // distinct: true,
-  });
-  const data = { items: items };
-  return ApiSuccess(res, data);
-});
 exports.createBox = catchAsync(async (req, res, next) => {
   const errors = validationResult(req);
 
@@ -42,23 +22,153 @@ exports.createBox = catchAsync(async (req, res, next) => {
   const name = req.body.name;
   const price = req.body.price;
 
-  const boxState = req.body.boxState;
-
+  const itemInBoxes = req.body.itemInBoxes;
+  console.log("itemInBoxes ", itemInBoxes);
   const item = await NftItem.create(
     {
       img: img,
       name: name,
       box: true,
-      boxStates: boxState,
+      itemInBoxes: itemInBoxes,
       nft: {
         price: price,
         minted: false,
       },
     },
     {
-      include: [BoxState, NFT],
+      include: [ItemInBox, NFT],
     }
   );
   const data = { item: item };
   return ApiSuccess(res, data);
+});
+exports.getAllBox = catchAsync(async (req, res, next) => {
+  const currentPage = req.query.page || 1;
+  const perPage = req.query.limit || 2;
+
+  const items = await NftItem.findAndCountAll({
+    where: { box: true },
+    // order: [...],
+    include: [
+      {
+        model: ItemInBox,
+        // where: {
+        //   speed: 1.04,
+        // },
+      },
+      {
+        model: NFT,
+      },
+    ],
+    limit: parseInt(perPage),
+    offset: parseInt((currentPage - 1) * perPage),
+    distinct: true,
+  });
+  const data = { items: items };
+  return ApiSuccess(res, data);
+});
+exports.getBox = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  errors.formatWith;
+  if (!errors.isEmpty()) {
+    throw new ApiError(httpStatus.BAD_REQUEST, errors.array()[0].msg);
+  }
+  const { id } = req.params;
+
+  const item = await NftItem.findOne({
+    where: { id: parseInt(id), box: true },
+    // order: [...],
+    include: [
+      {
+        model: ItemInBox,
+        // where: {
+        //   speed: 1.04,
+        // },
+      },
+
+      {
+        model: NFT,
+      },
+    ],
+  });
+  const data = { item: item };
+  return ApiSuccess(res, data);
+});
+exports.editBox = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  errors.formatWith;
+  if (!errors.isEmpty()) {
+    throw new ApiError(httpStatus.UNPROCESSABLE_ENTITY, errors.array()[0].msg);
+  }
+  const { id } = req.params;
+  const itemBody = pick(req.body, ["img", "name"]);
+
+  const itemInBoxes = req.body.itemInBoxes;
+
+  let item = await NftItem.findOne({
+    where: { id: parseInt(id), box: true },
+    // order: [...],
+    include: [
+      {
+        model: ItemInBox,
+        // where: {
+        //   speed: 1.04,
+        // },
+      },
+    ],
+  });
+
+  if (!item) {
+    throw ApiError(400, "Box is not exists");
+  }
+
+  // Get deltas
+
+  const itemInBoxDelta = getDelta(item.itemInBoxes, itemInBoxes);
+  console.log("itemInBoxDelta ", itemInBoxDelta);
+
+  // Start transaction
+  await sequelize
+    .transaction(async (transaction) => {
+      // Update phones
+      await Promise.all([
+        itemInBoxDelta.added.map(async (itemInBox) => {
+          console.log("itemInBoxDelta added");
+          await item.createItemInBox(itemInBox, { transaction });
+        }),
+        itemInBoxDelta.changed.map(async (itemInBox) => {
+          console.log("itemInBoxDelta changed");
+          const itemInBoxResult = item.itemInBoxes.find(
+            (_itemInBox) => _itemInBox.id === itemInBox.id
+          );
+          await itemInBoxResult.update(itemInBox, { transaction });
+        }),
+        itemInBoxDelta.changed.map(async (itemInBox) => {
+          console.log("itemInBoxDelta changed");
+          await ability.destroy({ transaction });
+        }),
+      ]);
+
+      // Finally update customer
+      return await item.update(itemBody, { transaction });
+    })
+    .then((item) =>
+      NftItem.findByPk(id, {
+        include: [
+          {
+            model: ItemInBox,
+          },
+          {
+            model: NFT,
+          },
+        ],
+      })
+    )
+    .then((result) => {
+      const data = { item: result };
+      return ApiSuccess(res, data);
+    })
+    .catch((err) => {
+      throw new ApiError(400, err);
+    });
 });

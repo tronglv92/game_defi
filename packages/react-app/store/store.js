@@ -2,23 +2,30 @@ import { combineReducers, configureStore, getDefaultMiddleware } from "@reduxjs/
 import { HYDRATE, createWrapper } from "next-redux-wrapper";
 import users from "./users/usersSlice";
 import counter from "./counter/counterSlice";
+import weapon from "./weapon/weaponSlice";
+import box from "./box/boxSlice";
 import createSagaMiddleware, { END } from "redux-saga";
 import rootSaga from "./rootSaga";
 const sagaMiddleware = createSagaMiddleware();
 const combinedReducer = combineReducers({
   counter,
   users,
+  weapon,
+  box,
 });
 const masterReducer = (state, action) => {
   if (action.type === HYDRATE) {
+    console.log("masterReducer action ", action);
+    console.log("masterReducer state ", state);
+
     const nextState = {
       ...state, // use previous state
-      counter: {
-        count: state.counter.count + action.payload.counter.count,
-      },
-      users: {
-        users: [...action.payload.users.users, ...state.users.users],
-      },
+      ...action.payload,
+      // weapon: {
+      //   ...state.weapon,
+      //   weapons: weapons,
+      //   count: action.payload.weapon.count,
+      // },
     };
     return nextState;
   } else {

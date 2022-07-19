@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { MenuId, MENU_ID, WalletId } from "../../constants/key";
 
-import { Web3Consumer } from "../../helpers/Web3Context";
-import Account from "../Account";
+import { Web3Consumer } from "../../helpers/connectAccount/Web3Context";
+import Account from "../Web3/Account";
 import { useMediaQuery } from "react-responsive";
-import ModalLogin from "../ModalLogin";
-import ModalNetworkDisplay from "../ModalNetworkDisplay";
+import ModalLogin from "../Web3/ModalLogin";
+import ModalNetworkDisplay from "../Web3/ModalNetworkDisplay";
 import { Breadcrumb, Button, Drawer, Layout, Menu, Row } from "antd";
 import icMysteryBox from "../../public/ic-mystery-box.svg";
 import icMarketPlace from "../../public/ic-marketplace.svg";
@@ -42,16 +42,7 @@ function LayoutView({ children, web3 }) {
     library,
     walletIdSelected,
   } = web3;
-  // const checkNetwork = async () => {
-  //   if (window.ethereum) {
-  //     const currentChainId = await library.provider.request({
-  //       method: "eth_chainId",
-  //     });
 
-  //     // return true if network id is the same
-  //     console.log("currentChainId ", currentChainId);
-  //   }
-  // };
   const router = useRouter();
   const [visible, setVisible] = useState(false);
   const showDrawer = () => {
@@ -85,7 +76,32 @@ function LayoutView({ children, web3 }) {
         break;
     }
   };
-  const isMobile = useMediaQuery({ query: `(max-width: 760px)` });
+  const getSelectedMenu = () => {
+    let selectedMenu = MENU_ID.Weapons;
+    // // Remove any query parameters, as those aren't included in breadcrumbs
+    const asPathWithoutQuery = router.asPath.split("?")[0];
+
+    // // Break down the path between "/"s, removing empty entities
+    // // Ex:"/my/nested/path" --> ["my", "nested", "path"]
+    const asPathNestedRoutes = asPathWithoutQuery.split("/").filter(v => v.length > 0);
+
+    if (asPathNestedRoutes.length > 0) {
+      switch (asPathNestedRoutes[0]) {
+        case "marketing":
+          selectedMenu = MENU_ID.Weapons;
+          break;
+        case "mystery-box":
+          selectedMenu = MENU_ID.MysteryBoxes;
+          break;
+        default:
+          selectedMenu = MENU_ID.Weapons;
+          break;
+      }
+    }
+    return selectedMenu;
+  };
+  const selectedMenu = getSelectedMenu();
+  const isMobile = useMediaQuery({ query: `(max-width: 768px)` });
   return (
     <>
       <Layout
@@ -122,7 +138,7 @@ function LayoutView({ children, web3 }) {
               <Menu
                 theme="dark"
                 mode="horizontal"
-                defaultSelectedKeys={[MENU_ID.Weapons]}
+                defaultSelectedKeys={[selectedMenu]}
                 items={items}
                 onClick={onClickMenu}
               />

@@ -9,15 +9,20 @@ import {
   UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
+import withAuth from "../../helpers/withAuth";
 import { Breadcrumb, Layout, Menu } from "antd";
-import ModalLogin from "../ModalLogin";
-import ModalNetworkDisplay from "../ModalNetworkDisplay";
+
+import ModalNetworkDisplay from "../Web3/ModalNetworkDisplay";
 
 import React, { Component, useState } from "react";
-import Account from "../Account";
+import Account from "../Web3/Account";
 import { Web3Consumer } from "../../helpers/connectAccount/Web3Context";
 import { useRouter } from "next/router";
 import { ADMIN_WEAPON_PATH, HOME_PATH, ADMIN_BOX_PATH } from "../../constants/path";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useWeb3React } from "@web3-react/core";
+import { setLogout } from "../../store/logout/logoutSlice";
 function getItem(label, key, icon, children) {
   return {
     key,
@@ -35,11 +40,21 @@ const MENU_KEY = {
 
 const { Header, Content, Footer, Sider } = Layout;
 function LayoutView({ children, web3 }) {
+  const { logout } = useSelector(state => state.logout);
+  const { deactivate } = useWeb3React();
+  const dispatch = useDispatch();
   const router = useRouter();
+
+  useEffect(() => {
+    if (logout == true) {
+      deactivate();
+      dispatch(setLogout(false));
+    }
+  }, [logout]);
+
   const {
     logoutOfWeb3Modal,
-    showModalLogin,
-    setShowModalLogin,
+
     onLogin,
     showModalDisplayNetWork,
     setShowModalDisplayNetWork,
@@ -115,7 +130,7 @@ function LayoutView({ children, web3 }) {
     return [{ href: "/", text: "Home" }, ...crumblist];
   };
   const breadcrumbs = generateBreadcrumbs();
-  console.log("breadcrumbs ", breadcrumbs);
+
   return (
     <>
       <Layout
@@ -171,13 +186,7 @@ function LayoutView({ children, web3 }) {
               />
             )}
 
-            <Account
-              {...web3}
-              onConnect={() => {
-                setShowModalLogin(true);
-              }}
-              onLogout={logoutOfWeb3Modal}
-            />
+            <Account {...web3} onConnect={() => {}} onLogout={logoutOfWeb3Modal} />
           </Header>
           {/* BODY */}
           <Content
@@ -192,10 +201,11 @@ function LayoutView({ children, web3 }) {
             >
               {breadcrumbs.map((item, index) => {
                 if (index == 0) {
-                  return <Breadcrumb.Item>{item.text}</Breadcrumb.Item>;
+                  return <Breadcrumb.Item key={index}>{item.text}</Breadcrumb.Item>;
                 } else if (index != breadcrumbs.length - 1) {
                   return (
                     <Breadcrumb.Item
+                      key={index}
                       className="hover:underline cursor-pointer"
                       onClick={() => {
                         router.push(item.href);
@@ -205,7 +215,7 @@ function LayoutView({ children, web3 }) {
                     </Breadcrumb.Item>
                   );
                 } else {
-                  return <Breadcrumb.Item>{item.text}</Breadcrumb.Item>;
+                  return <Breadcrumb.Item key={index}>{item.text}</Breadcrumb.Item>;
                 }
               })}
             </Breadcrumb>
@@ -216,7 +226,7 @@ function LayoutView({ children, web3 }) {
                 minHeight: 300,
               }}
             >
-              {children}
+              <div>{children}</div>
             </div>
           </Content>
           <Footer
@@ -228,15 +238,7 @@ function LayoutView({ children, web3 }) {
           </Footer>
         </Layout>
       </Layout>
-      {showModalLogin == true && (
-        <ModalLogin
-          setShowModalLogin={setShowModalLogin}
-          onLogin={wallet => {
-            console.log("ModalLogin wallet ", wallet);
-            onLogin(wallet);
-          }}
-        />
-      )}
+
       {showModalDisplayNetWork == true && (
         <ModalNetworkDisplay
           walletIdSelected={walletIdSelected}
@@ -290,4 +292,4 @@ function LayoutView({ children, web3 }) {
     </>
   );
 }
-export default Web3Consumer(LayoutView);
+export default Web3Consumer(withAuth(LayoutView));

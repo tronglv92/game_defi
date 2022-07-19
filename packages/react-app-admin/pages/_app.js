@@ -1,19 +1,20 @@
 import "../styles/index.css";
 import "antd/dist/antd.css";
+import NextNProgress from "nextjs-progressbar";
 import React, { useEffect, useRef } from "react";
 import { Web3Provider as Web3ContextProvider } from "../helpers/connectAccount/Web3Context";
 import { Web3ReactProvider } from "@web3-react/core";
-import { DevUI, NetworkDisplay, ThemeSwitch } from "../components";
 import { ThemeProvider } from "next-themes";
-import Head from "next/head";
+
 import { ethers } from "ethers";
 import { POLLING_INTERVAL } from "../helpers/connectAccount/connectors";
 import { wrapper } from "../store/store";
 import LayoutView from "../components/Layout/LayoutView";
+import { useRouter } from "next/router";
 
 function MyApp({ Component, pageProps }) {
   const prevTheme = useRef("light");
-
+  const router = useRouter();
   const themes = {
     dark: `/css/dark-theme.css`,
     light: `/css/light-theme.css`,
@@ -29,23 +30,25 @@ function MyApp({ Component, pageProps }) {
     library.pollingInterval = POLLING_INTERVAL;
     return library;
   }
+
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
       <Web3ContextProvider network="localhost">
         <ThemeProvider attribute="class">
           <>
-            <Head>
-              <link
-                rel="icon"
-                href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏗</text></svg>"
-              />
-            </Head>
             {/* <NetworkDisplay /> */}
             {/* <DevUI /> */}
-
-            <LayoutView>
-              <Component {...pageProps} />
-            </LayoutView>
+            {router.pathname !== "/login" ? (
+              <LayoutView>
+                <NextNProgress color="#29D" startPosition={0.3} stopDelayMs={200} height={3} showOnShallow={true} />
+                <Component {...pageProps} />
+              </LayoutView>
+            ) : (
+              <>
+                <NextNProgress color="#29D" startPosition={0.3} stopDelayMs={200} height={3} showOnShallow={true} />
+                <Component {...pageProps} />
+              </>
+            )}
           </>
         </ThemeProvider>
       </Web3ContextProvider>

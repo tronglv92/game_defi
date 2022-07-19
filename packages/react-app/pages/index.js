@@ -1,15 +1,8 @@
 import { useContractReader } from "eth-hooks";
 import React, { useContext, useState } from "react";
-import { Contract, Account, Header } from "../components";
-import ExampleUI from "../components/Views/ExampleUI";
-import { Web3Consumer } from "../helpers/Web3Context";
-import Image from "next/image";
-import { Row, Col, Card, Rate, Divider, Checkbox } from "antd";
-import icStaff from "../public/ic-staff-small.svg";
 
-import bow from "../public/bow.svg";
-import { FilterOutlined } from "@ant-design/icons";
-import Filter from "../components/Filter";
+import { Web3Consumer } from "../helpers/connectAccount/Web3Context";
+
 import { useMediaQuery } from "react-responsive";
 import { wrapper } from "../store/store";
 import { END } from "redux-saga";

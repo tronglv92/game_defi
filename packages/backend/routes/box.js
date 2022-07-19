@@ -1,6 +1,6 @@
 const express = require("express");
 const isAuth = require("../middleware/is-auth");
-const { body } = require("express-validator/check");
+const { body, param } = require("express-validator/check");
 const router = express.Router();
 const boxController = require("../controllers/box");
 // POST /box/createBox
@@ -12,15 +12,38 @@ router.post(
     body("name", "Please enter name").trim().not().isEmpty(),
     body("price", "Price must be a number").trim().isNumeric(),
 
-    body("boxState", "Box stat must be array").isArray(),
-    body("boxState.*.level", "Level Box Stat must be a number")
+    body("itemInBoxes", "Box stat must be array").isArray(),
+    body("itemInBoxes.*.level", "Level Item In Box must be a number")
       .exists()
       .isNumeric(),
-    body("boxState.*.percent", "Percent Box Stat must be a decimal")
+    body("itemInBoxes.*.percent", "Percent Item In Box must be a decimal")
       .exists()
       .isDecimal(),
   ],
   boxController.createBox
 );
-router.get("/getBox", boxController.getBox);
+router.post(
+  "/editBox/:id",
+  // isAuth,
+  [
+    body("img", "Please enter url imge").trim().not().isEmpty(),
+    body("name", "Please enter name").trim().not().isEmpty(),
+    body("price", "Price must be a number").trim().isNumeric(),
+
+    body("itemInBoxes", "Box stat must be array").isArray(),
+    body("itemInBoxes.*.level", "Level Box Stat must be a number")
+      .exists()
+      .isNumeric(),
+    body("itemInBoxes.*.percent", "Percent Box Stat must be a decimal")
+      .exists()
+      .isDecimal(),
+  ],
+  boxController.editBox
+);
+router.get("/getAllBox", boxController.getAllBox);
+router.get(
+  "/getBox/:id",
+  [param("id", "Id is empty").trim().not().isEmpty()],
+  boxController.getBox
+);
 module.exports = router;

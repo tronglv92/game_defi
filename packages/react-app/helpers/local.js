@@ -1,3 +1,5 @@
+import { LS_KEY } from "../constants/key";
+
 export let local;
 
 if (isLocalStorageAvailable()) {
@@ -36,6 +38,12 @@ export const getLocal = key => {
   return data;
 };
 
+export const getAuth = () => {
+  return getLocal(LS_KEY);
+};
+export const setAuth = auth => {
+  setLocal(LS_KEY, auth);
+};
 export const removeLocal = key => {
   if (local) {
     local.removeItem(key);

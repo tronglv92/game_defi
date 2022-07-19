@@ -1,7 +1,6 @@
 import { useContractReader } from "eth-hooks";
 import React, { useContext } from "react";
-import { Contract, Account, Header } from "../components";
-import ExampleUI from "../components/Views/ExampleUI";
+
 import { Web3Consumer } from "../helpers/connectAccount/Web3Context";
 
 function Home({ web3 }) {

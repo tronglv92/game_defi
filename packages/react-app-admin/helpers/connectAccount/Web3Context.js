@@ -16,11 +16,6 @@ import externalContracts from "../../contracts/external_contracts";
 import { activateInjectedProvider, getErrorMessage, getWalletById, injected } from "./connectors";
 import { useWeb3React } from "@web3-react/core";
 
-import { getLocal, setLocal } from "../local";
-import { AUTH_LOCAL_ID, LS_KEY, METAMASK_ID } from "../../constants/key";
-
-import { useBalance } from "../../hooks/useBalance";
-import lib from "@ant-design/icons";
 import _ from "lodash";
 import { useEagerConnectLogin } from "./ConnectHook";
 const { ethers, BigNumber } = require("ethers");
@@ -37,6 +32,7 @@ export function Web3Provider({ children, ...props }) {
 
   const { network = "localhost", DEBUG = true, NETWORKCHECK = true } = props;
   const { active, account, library, connector, chainId, activate, deactivate } = useWeb3React();
+  console.log("Web3Provider account ", account);
   // app states
   // const [injectedProvider, setInjectedProvider] = useState();
   const [yourLocalBalance, setYourLocalBalance] = useState(BigNumber.from(0));
@@ -103,6 +99,7 @@ export function Web3Provider({ children, ...props }) {
   const selectedChainId =
     userSigner && userSigner.provider && userSigner.provider._network && userSigner.provider._network.chainId;
 
+    console.log("selectedChainId ", selectedChainId);
   // For more hooks, check out 🔗eth-hooks at: https://www.npmjs.com/package/eth-hooks
 
   // The transactor wraps transactions and provides notificiations
@@ -214,14 +211,7 @@ export function Web3Provider({ children, ...props }) {
     writeContracts,
     mainnetContracts,
   ]);
-  // const clearAccount = () => {
-  //   setLocal(LS_KEY, null);
-  //   setYourAccount(null);
-  //   setYourLocalBalance(0);
-  //   setState({ auth: null });
-  //   setWalletIdSelected(null);
-  //   // deactivate();
-  // };
+
   const onLogin = async wallet => {
     console.log("onLogin wallet ", wallet);
     try {

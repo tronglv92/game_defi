@@ -53,6 +53,7 @@
     "next-redux-wrapper": "7.0.5",
     "next-themes": "^0.2.0",
     "next-transpile-modules": "^8.0.0",
+    "nextjs-progressbar": "^0.0.14",
     "node-watch": "^0.7.1",
     "qrcode.react": "^1.0.0",
     "react": "^17.0.2",

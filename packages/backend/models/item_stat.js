@@ -15,7 +15,10 @@ const ItemStat = sequelize.define("itemStat", {
     type: Sequelize.DOUBLE,
     allowNull: false,
   },
-
+  hp: {
+    type: Sequelize.DOUBLE,
+    allowNull: false,
+  },
   critical: {
     type: Sequelize.DOUBLE,
     allowNull: false,

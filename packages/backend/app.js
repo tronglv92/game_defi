@@ -11,7 +11,7 @@ const NftModel = require("./models/nft");
 const NftItemModel = require("./models/nft_item");
 const ItemStatModel = require("./models/item_stat");
 const ItemAbilitiesModel = require("./models/item_abilities");
-const BoxStateModel = require("./models/box_state");
+const ItemInBoxModel = require("./models/item_in_box");
 // const multer = require("multer");
 const weaponRouter = require("./routes/weapon");
 const boxRouter = require("./routes/box");
@@ -58,8 +58,11 @@ NftItemModel.hasMany(ItemAbilitiesModel, {
 });
 ItemAbilitiesModel.belongsTo(NftItemModel);
 
-NftItemModel.hasMany(BoxStateModel, { constraints: true, onDelete: "CASCADE" });
-BoxStateModel.belongsTo(NftItemModel);
+NftItemModel.hasMany(ItemInBoxModel, {
+  constraints: true,
+  onDelete: "CASCADE",
+});
+ItemInBoxModel.belongsTo(NftItemModel);
 
 // Mount REST on /api
 sequelize

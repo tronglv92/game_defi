@@ -9,4 +9,9 @@ export const LS_KEY = "login-with-metamask:auth";
 export const METAMASK_ID = "metamask_connect";
 export const COINBASE_ID = "coinbase_connect";
 export const WALLET_ID = "wallet_connect";
+export const WEAPON_CLASS = {
+  Sword: 0,
+  Staff: 1,
+  Bow: 2,
+};
 // export const CACHED_PROVIDER_KEY = "WEB3_CONNECT_CACHED_PROVIDER";

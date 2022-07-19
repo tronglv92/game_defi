@@ -61,5 +61,6 @@ exports.create = catchAsync(async (req, res, next) => {
   }
   return ApiSuccess(res, {
     token: token,
+    user: user,
   });
 });

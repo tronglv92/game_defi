@@ -2,7 +2,7 @@ import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switc
 import React, { useState } from "react";
 import { utils } from "ethers";
 
-import { Address, Balance, Events } from "../../components";
+import { Address, Balance, Events } from "../Web3";
 
 export default function ExampleUI({
   purpose,

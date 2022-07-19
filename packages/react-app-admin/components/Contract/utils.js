@@ -1,5 +1,5 @@
 import React from "react";
-import { Address } from "..";
+import { Address } from "../Web3";
 
 const { utils } = require("ethers");
 

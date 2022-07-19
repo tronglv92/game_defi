@@ -1,9 +1,9 @@
 import axiosClient from "../axiosClient";
 
-export const uploadMultipleApi = async variables => {
+export const uploadMultipleApi = async params => {
   const url = `/upload/multiple-file-upload`;
 
-  const { imgs } = variables;
+  const { imgs } = params;
 
   let form = new FormData();
   for (let i = 0; i < imgs.length; i++) {

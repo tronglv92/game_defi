@@ -2,16 +2,29 @@ import React, { useContext, useState } from "react";
 
 import { Rate } from "antd";
 
-import staff from "../../public/staff.svg";
-
+import icStaff from "../../public/staff.svg";
+import icSword from "../../public/ic-sword-small.svg";
+import icBow from "../../public/ic-bow-small.svg";
+import { useRouter } from "next/router";
 import { LeftOutlined } from "@ant-design/icons";
-
-function DetailWeapon({ web3 }) {
+import { getWeaponByIdApi } from "../../../react-app-admin/store/weapon/weaponApi";
+import { wrapper } from "../../store/store";
+import { formatCurrency } from "../../helpers/helper";
+import Image from "next/image";
+import { WEAPON_CLASS } from "../../constants/key";
+function DetailWeapon({ web3, weapon }) {
+  console.log("weapon ", weapon);
+  const router = useRouter();
   return (
     <>
       <div className="py-5 md:py-[50px] max-w-screen-2xl mx-auto">
         <div className="flex items-center justify-between ">
-          <div className="flex items-center">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() => {
+              router.replace("/marketing");
+            }}
+          >
             <LeftOutlined style={{ color: "#FFC700", fontSize: "30px", fontWeight: "bold" }} />
             <span className="text-[#FFC700] text-3xl ml-2">Back</span>
           </div>
@@ -20,14 +33,14 @@ function DetailWeapon({ web3 }) {
           </div>
         </div>
         <div className="mt-8 md:mt-20 grid md:grid-cols-2 gap-10">
-          <div sm={24} md={12} className="max-w-lg w-full mx-auto ">
+          <div sm={24} md={12} className="flex flex-col max-w-lg w-full mx-auto ">
             <div className="flex w-full justify-between ">
               <span
                 className="bg-[url('/price-bg.png')] w-[160px] h-[40px] md:w-[165px] md:h-[56px] flex items-center 
               justify-center text-base md:text-lg font-extrabold text-[#FFE368]"
                 style={{ backgroundSize: "100% 100%" }}
               >
-                400.00 KWS
+                {weapon.nft ? formatCurrency(weapon.nft.price) : 0} KWS
               </span>
               <span
                 className="bg-[url('/price-bg.png')] w-[160px] h-[40px] md:w-[165px] md:h-[56px] flex items-center
@@ -37,7 +50,7 @@ function DetailWeapon({ web3 }) {
                 $1.31
               </span>
             </div>
-            <img className="max-w-[250px] mx-auto" src="/staff.png" />
+            <Image className="max-w-[250px] mx-auto object-contain " src={weapon.img} height="300" width="300" />
             <img src="/stone-shelf.png" className="mx-auto max-w-full"></img>
             <div className="text-center mt-10">
               <button className="uppercase text-[16px] bg-[url('/sell-buy.png')]  w-[319px] h-[60px] text-[#FFC700] font-bold">
@@ -53,120 +66,138 @@ function DetailWeapon({ web3 }) {
             >
               <span
                 className="flex justify-center items-center uppercase text-[16px] bg-[url('/sell-buy.png')] 
-              border-none bg-no-repeat bg-center bg-contain w-[268px] h-[50px] text-white 
-              absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/3 font-bold"
+              border-none bg-no-repeat bg-center bg-contain w-[268px] h-[50px] text-white
+              absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/3 font-bold "
               >
                 about
               </span>
               <div className="grid grid-cols-2 gap-15">
                 <div className="flex items-center">
                   <span className="text-[#F3D29C] text-[17px] font-bold w-24">Type</span>
-                  <img src={staff.src} />
+                  <img
+                    src={
+                      weapon.type == WEAPON_CLASS.Sword
+                        ? icSword.src
+                        : weapon.type == WEAPON_CLASS.Bow
+                        ? icBow.src
+                        : icStaff.src
+                    }
+                  />
                 </div>
                 <div className="flex  items-center">
                   <span className="text-[#F3D29C] text-[17px] font-bold w-24">Level</span>
-                  <span className="text-white font-bold text-base">12</span>
+                  <span className="text-white font-bold text-base">{weapon.level}</span>
                 </div>
               </div>
               <div className="mt-8 grid grid-cols-2 gap-15 ">
                 <div className="flex items-center">
                   <span className="text-[#F3D29C] text-[17px] font-bold w-24">ID</span>
-                  <span className="text-white font-bold text-base">#1001905</span>
+                  <span className="text-white font-bold text-base">#{weapon.id}</span>
                 </div>
                 <div className="flex  items-center">
                   <span className="text-[#F3D29C] text-[17px] font-bold w-24">Star</span>
-                  <Rate count={1} value={1} style={{ fontSize: "16px" }} />
+                  {weapon.star && <Rate count={weapon.star} value={weapon.star} style={{ fontSize: "16px" }} />}
                 </div>
               </div>
             </div>
             {/* STAT */}
-            <div
-              className="bg-[url('/item-detail-bg.png')] bg-center bg-no-repeat px-10 md:px-20 
+            {weapon.itemStat && (
+              <div
+                className="bg-[url('/item-detail-bg.png')] bg-center bg-no-repeat px-10 md:px-20 
               py-16 relative mt-20"
-              style={{ backgroundSize: "100% 100%" }}
-            >
-              <span
-                className="flex justify-center items-center uppercase text-[16px] bg-[url('/sell-buy.png')] 
+                style={{ backgroundSize: "100% 100%" }}
+              >
+                <span
+                  className="flex justify-center items-center uppercase text-[16px] bg-[url('/sell-buy.png')] 
               border-none bg-no-repeat bg-center bg-contain w-[268px] h-[50px] text-white 
               absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/3 font-bold"
-              >
-                stat
-              </span>
-              <div className="flex justify-around">
-                <div>
-                  <span className="text-[#F3D29C] text-[17px] font-bold">Damage</span>
-                  <div className="mt-5 flex">
-                    <img src="/ic-dmg.png" className="mr-2"></img>
-                    <span _ngcontent-njy-c37="" class="text-white text-base font-bold">
-                      309.69
-                    </span>
+                >
+                  stat
+                </span>
+                <div className="grid lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-4 xl:grid-cols-4 justify-around">
+                  <div className="mt-8">
+                    <span className="text-[#F3D29C] text-[17px] font-bold ">Damage</span>
+                    <div className="mt-2 flex">
+                      <img src="/ic-dmg.png" className="mr-2"></img>
+                      <span _ngcontent-njy-c37="" className="text-white text-base font-bold">
+                        {weapon.itemStat.damage}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <span className="text-[#F3D29C] text-[17px] font-bold">Speed</span>
-                  <div className="mt-5 flex">
-                    <img src="/ic-speed.png" className="mr-2"></img>
-                    <span className="text-white text-base font-bold">1.03</span>
+                  <div className="mt-8">
+                    <span className="text-[#F3D29C] text-[17px] font-bold ">Speed</span>
+                    <div className="mt-2 flex">
+                      <img src="/ic-speed.png" className="mr-2"></img>
+                      <span className="text-white text-base font-bold"> {weapon.itemStat.speed}</span>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <span className="text-[#F3D29C] text-[17px] font-bold">Hp</span>
-                  <div className="mt-5 flex">
-                    <img src="/ic-hp.png" className="mr-2"></img>
-                    <span className="text-white text-base font-bold">2024.64</span>
+                  <div className="mt-8">
+                    <span className="text-[#F3D29C] text-[17px] font-bold mt-5">Hp</span>
+                    <div className="mt-2 flex">
+                      <img src="/ic-hp.png" className="mr-2"></img>
+                      <span className="text-white text-base font-bold"> {weapon.itemStat.hp}</span>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <span className="text-[#F3D29C] text-[17px] font-bold">Critical</span>
-                  <div className="mt-5 flex">
-                    <img src="/ic-critical.png" className="mr-2"></img>
-                    <span className="text-white text-base font-bold">21.09</span>
+                  <div className="mt-8">
+                    <span className="text-[#F3D29C] text-[17px] font-bold mt-5">Critical</span>
+                    <div className="mt-2 flex">
+                      <img src="/ic-critical.png" className="mr-2"></img>
+                      <span className="text-white text-base font-bold"> {weapon.itemStat.critical}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
             {/* ABILITIES */}
-            <div
-              className="bg-[url('/item-detail-bg.png')] bg-center bg-no-repeat px-10 md:px-20 
+            {weapon.itemAbilities.length > 0 && (
+              <div
+                className="bg-[url('/item-detail-bg.png')] bg-center bg-no-repeat px-10 md:px-20 
               py-16 relative mt-20"
-              style={{ backgroundSize: "100% 100%" }}
-            >
-              <span
-                className="flex justify-center items-center uppercase text-[16px] bg-[url('/sell-buy.png')] 
+                style={{ backgroundSize: "100% 100%" }}
+              >
+                <span
+                  className="flex justify-center items-center uppercase text-[16px] bg-[url('/sell-buy.png')] 
               border-none bg-no-repeat bg-center bg-contain w-[268px] h-[50px] text-white 
               absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/3 font-bold"
-              >
-                abilities
-              </span>
-              <div className="mt-5 flex">
-                <img className="mr-5 max-w-[70px]" src="https://static.knightwar.io/skills/2.png"></img>
-                <div className="flex-1 flex-col">
-                  <div className="flex justify-between align-middle">
-                    <span className="text-[#F3D29C] text-[17px] font-extrabold flex justify-between ">Explosive </span>
-                    <span className="text-base font-bold text-[#ffc69ba3]">Level 1</span>
-                  </div>
-                  <span className="text-white text-sm md:text-base font-bold">
-                    Have 40% explore when attack. Range explore 1 damage 50%{" "}
-                  </span>
-                </div>
+                >
+                  abilities
+                </span>
+                {weapon.itemAbilities.map((ability, index) => {
+                  return (
+                    <div className="mt-5 flex" key={index}>
+                      <Image className="object-contain min-w[70px]" src={ability.img} height="70" width="70" />
+                      <div className="flex-1 flex-col ml-5">
+                        <div className="flex justify-between align-middle">
+                          <span className="text-[#F3D29C] text-[17px] font-extrabold flex justify-between ">
+                            {ability.name}
+                          </span>
+                          <span className="text-base font-bold text-[#ffc69ba3]">Level {ability.level}</span>
+                        </div>
+                        <span className="text-white text-sm md:text-base font-bold">{ability.description}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="mt-5 flex">
-                <img className="mr-5 max-w-[70px]" src="https://static.knightwar.io/skills/6.png"></img>
-                <div className="flex-1 flex-col">
-                  <div className="flex justify-between align-middle">
-                    <span className="text-[#F3D29C] text-[17px] font-extrabold flex justify-between ">Icy </span>
-                    <span className="text-base font-bold text-[#ffc69ba3]">Level 2</span>
-                  </div>
-                  <span className="text-white text-sm md:text-base font-bold flex-1">
-                    Have 100% slow when attack. Slow 45%, slow time 2.5s
-                  </span>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
     </>
   );
 }
+export const getServerSideProps = wrapper.getServerSideProps(store => async context => {
+  const { params } = context;
+  const { id } = params;
+  if (id != "requestProvider.js.map") {
+    const result = await getWeaponByIdApi({ id: id });
+
+    console.log("Detail weapons result ", result);
+    return {
+      props: {
+        weapon: result.data.item,
+      },
+    };
+  }
+});
 export default DetailWeapon;

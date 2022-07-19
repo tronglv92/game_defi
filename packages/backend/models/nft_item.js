@@ -10,6 +10,7 @@ const NftItem = sequelize.define("nftItem", {
   name: {
     type: Sequelize.STRING,
   },
+  //O: sword , 1: Staff,  2: Bow
   type: {
     type: Sequelize.INTEGER,
     allowNull: true,
