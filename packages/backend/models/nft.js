@@ -1,4 +1,5 @@
 const { Sequelize } = require("sequelize");
+const { STATE_NFT } = require("../contracts/constant");
 const sequelize = require("../helper/db");
 const NFT = sequelize.define("nft", {
   id: {
@@ -25,6 +26,16 @@ const NFT = sequelize.define("nft", {
     type: Sequelize.BOOLEAN,
     allowNull: false,
     defaultValue: () => false,
+  },
+  hashNFT: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  //  (in Marketplace, in Game)
+  state: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    defaultValue: () => STATE_NFT.Market,
   },
 });
 module.exports = NFT;

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract ThetanBoxHubV2 is Ownable {
+contract ThetanBoxHub is Ownable {
     /* ========== LIBs ========== */
 
     using SafeERC20 for IERC20;
@@ -22,7 +22,6 @@ contract ThetanBoxHubV2 is Ownable {
     event ThetanBoxPaid(
         uint256 indexed id,
         address buyer,
-        uint256 boxType,
         uint256 price,
         address paymentToken
     );
@@ -31,21 +30,27 @@ contract ThetanBoxHubV2 is Ownable {
 
     function getBuyBoxMessageHash(
         uint256 id,
-        uint256 boxType,
+        // uint256 boxType,
         address user,
         uint256 price,
-        address paymentErc20,
-        uint256 expiredAt
-    ) public pure returns (bytes32) {
+        address paymentErc20
+    )
+        public
+        pure
+        returns (
+            // uint256 expiredAt
+            bytes32
+        )
+    {
         return
             keccak256(
                 abi.encodePacked(
                     user,
                     id,
-                    boxType,
+                    // boxType,
                     price,
-                    paymentErc20,
-                    expiredAt
+                    paymentErc20
+                    // expiredAt
                 )
             );
     }
@@ -83,10 +88,10 @@ contract ThetanBoxHubV2 is Ownable {
      */
     function buyBoxWithSignature(
         uint256 id,
-        uint256 boxType,
+        // uint256 boxType,
         uint256 price,
         address paymentErc20,
-        uint256 expiredAt,
+        // uint256 expiredAt,
         bytes calldata signature
     ) external {
         require(
@@ -94,11 +99,11 @@ contract ThetanBoxHubV2 is Ownable {
             "ThetanBoxPayment: Only user address is allowed to buy box"
         );
         require(signer != address(0), "Signer has not been set yet");
-        require(
-            block.timestamp < expiredAt,
-            "ThetanBoxPayment: the signature is expired"
-        );
-        require(boxType > 0, "ThetanBoxPayment: Invalid box type");
+        // require(
+        //     block.timestamp < expiredAt,
+        //     "ThetanBoxPayment: the signature is expired"
+        // );
+        // require(boxType > 0, "ThetanBoxPayment: Invalid box type");
         require(price > 0, "ThetanBoxPayment: Invalid payment amount");
         require(
             !ids[id],
@@ -106,10 +111,10 @@ contract ThetanBoxHubV2 is Ownable {
         );
         verifyBuyBoxSignature(
             id,
-            boxType,
+            // boxType,
             price,
             paymentErc20,
-            expiredAt,
+            // expiredAt,
             signature
         );
 
@@ -131,81 +136,80 @@ contract ThetanBoxHubV2 is Ownable {
 
         ids[id] = true;
         // Emit payment event
-        emit ThetanBoxPaid(id, msg.sender, boxType, price, paymentErc20);
+        emit ThetanBoxPaid(id, msg.sender, price, paymentErc20);
     }
 
-    function buyBoxFreeWithSignature(
-        uint256 id,
-        uint256 boxType,
-        uint256 price,
-        address paymentErc20,
-        uint256 expiredAt,
-        bytes calldata signature
-    ) external {
-        require(signer != address(0), "Signer has not been set yet");
-        require(
-            block.timestamp < expiredAt,
-            "ThetanBoxPayment: the signature is expired"
-        );
-        require(boxType > 0, "ThetanBoxPayment: Invalid box type");
-        require(price >= 0, "ThetanBoxPayment: Invalid payment amount");
-        require(
-            !ids[id],
-            "ThetanBoxPayment: id is used. please send another transaction with new signature"
-        );
-        verifyBuyBoxSignature(
-            id,
-            boxType,
-            price,
-            paymentErc20,
-            expiredAt,
-            signature
-        );
+    // function buyBoxFreeWithSignature(
+    //     uint256 id,
+    //     uint256 boxType,
+    //     uint256 price,
+    //     address paymentErc20,
+    //     uint256 expiredAt,
+    //     bytes calldata signature
+    // ) external {
+    //     require(signer != address(0), "Signer has not been set yet");
+    //     require(
+    //         block.timestamp < expiredAt,
+    //         "ThetanBoxPayment: the signature is expired"
+    //     );
+    //     require(boxType > 0, "ThetanBoxPayment: Invalid box type");
+    //     require(price >= 0, "ThetanBoxPayment: Invalid payment amount");
+    //     require(
+    //         !ids[id],
+    //         "ThetanBoxPayment: id is used. please send another transaction with new signature"
+    //     );
+    //     verifyBuyBoxSignature(
+    //         id,
+    //         boxType,
+    //         price,
+    //         paymentErc20,
+    //         expiredAt,
+    //         signature
+    //     );
 
-        // Transfer payment
-        IERC20 paymentToken = IERC20(paymentErc20);
-        uint256 allowToPayAmount = paymentToken.allowance(
-            msg.sender,
-            address(this)
-        );
-        require(
-            allowToPayAmount >= price,
-            "ThetanBoxPayment: Invalid token allowance"
-        );
+    //     // Transfer payment
+    //     IERC20 paymentToken = IERC20(paymentErc20);
+    //     uint256 allowToPayAmount = paymentToken.allowance(
+    //         msg.sender,
+    //         address(this)
+    //     );
+    //     require(
+    //         allowToPayAmount >= price,
+    //         "ThetanBoxPayment: Invalid token allowance"
+    //     );
 
-        if (price > 0) {
-            // transfer token from contrat to user
-            paymentToken.safeTransfer(msg.sender, price);
-            // transfer token from user to contract
-            paymentToken.safeTransferFrom(
-                msg.sender,
-                paymentReceivedAddress,
-                price
-            );
-        }
+    //     if (price > 0) {
+    //         // transfer token from contrat to user
+    //         paymentToken.safeTransfer(msg.sender, price);
+    //         // transfer token from user to contract
+    //         paymentToken.safeTransferFrom(
+    //             msg.sender,
+    //             paymentReceivedAddress,
+    //             price
+    //         );
+    //     }
 
-        ids[id] = true;
-        // Emit payment event
-        emit ThetanBoxPaid(id, msg.sender, boxType, price, paymentErc20);
-    }
+    //     ids[id] = true;
+    //     // Emit payment event
+    //     emit ThetanBoxPaid(id, msg.sender, boxType, price, paymentErc20);
+    // }
 
     /* ========== VERIFY FUNCTIONS ========== */
 
     function verifyBuyBoxSignature(
         uint256 id,
-        uint256 boxType,
+        // uint256 boxType,
         uint256 price,
         address paymentErc20,
-        uint256 expiredAt,
+        // uint256 expiredAt,
         bytes calldata signature
     ) public view {
         bytes32 criteriaMessageHash = getBuyBoxMessageHash(
             id,
-            boxType,
             msg.sender,
             price,
-            paymentErc20,
-            expiredAt
+            paymentErc20
+            // expiredAt
         );
         bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(
             criteriaMessageHash

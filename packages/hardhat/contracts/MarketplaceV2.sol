@@ -90,6 +90,8 @@ contract MarketplaceV2 is Ownable {
     /**
      * @dev Function matched transaction with user signatures
      */
+    // address[0]=sellerAddress, address[1]=nftAddress,  address[2]=paymentErc20?
+    // values[0]= tokenId, values[1]=price, values[2]=saltNonce?
     function matchTransaction(
         address[3] calldata addresses,
         uint256[3] calldata values,

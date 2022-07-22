@@ -4,6 +4,7 @@ import users from "./users/usersSlice";
 import counter from "./counter/counterSlice";
 import weapon from "./weapon/weaponSlice";
 import box from "./box/boxSlice";
+import myBox from "./myBox/myBoxSlice";
 import createSagaMiddleware, { END } from "redux-saga";
 import rootSaga from "./rootSaga";
 const sagaMiddleware = createSagaMiddleware();
@@ -12,6 +13,7 @@ const combinedReducer = combineReducers({
   users,
   weapon,
   box,
+  myBox,
 });
 const masterReducer = (state, action) => {
   if (action.type === HYDRATE) {
@@ -32,7 +34,7 @@ const masterReducer = (state, action) => {
     return combinedReducer(state, action);
   }
 };
-const middleware = [...getDefaultMiddleware(), sagaMiddleware];
+const middleware = [...getDefaultMiddleware({ serializableCheck: false }), sagaMiddleware];
 export const makeStore = () => {
   const store = configureStore({
     reducer: masterReducer,

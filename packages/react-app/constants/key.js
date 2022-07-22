@@ -12,10 +12,13 @@ export const WALLET_ID = "wallet_connect";
 export const MENU_ID = {
   Weapons: "Weapons",
   MysteryBoxes: "MysteryBoxes",
+  BuyToken: "BuyToken",
+  MyBoxes: "MyBoxes",
 };
 export const WEAPON_CLASS = {
   Sword: 0,
   Staff: 1,
   Bow: 2,
 };
+export const PAYMENT_ERC20 = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
 // export const CACHED_PROVIDER_KEY = "WEB3_CONNECT_CACHED_PROVIDER";

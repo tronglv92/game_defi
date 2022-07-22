@@ -6,9 +6,146 @@ import { LeftOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import { getBoxByIdApi } from "../../store/box/boxApi";
 import Image from "next/image";
-function DetailMysteryBox({ web3, box }) {
-  const router = useRouter();
+import { Web3Consumer } from "../../helpers/connectAccount/Web3Context";
+import { Modal, notification } from "antd";
+import { BigNumber } from "ethers";
+import { PAYMENT_ERC20 } from "../../constants/key";
+import { useDispatch, useSelector } from "react-redux";
+import { getSignatureWhenBuyBox, updateNFT } from "../../store/box/boxSlice";
+import { LOGIN_PATH, MARKETING_PATH } from "../../constants/path";
+import { useContractReader } from "eth-hooks";
+import { DECIMAL, STATE_NFT } from "../../constants/constant";
+import ButtonLoading from "../../components/Views/ButtonLoading";
 
+function DetailMysteryBox({ web3, box }) {
+  const { writeContracts, readContracts, yourAccount, setShowModalLogin, tx } = web3;
+  const [isLoadBuyBox, setIsLoadBuyBox] = useState(false);
+  // balance = useContractReader(readContracts, "ThetanCoin", "balanceOf", [yourAccount]);
+  // allow = useContractReader(readContracts, "ThetanCoin", "allowance", [yourAccount, readContracts.ThetanCoin.address]);
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const onClickBuyItem = async () => {
+    if (yourAccount) {
+      if (writeContracts && readContracts) {
+        setIsLoadBuyBox(true);
+        console.log("box ", box);
+        console.log("readContracts ", readContracts);
+        const id = box.id;
+
+        // const price = BigNumber.from(box.nft.price).mul(BigNumber.from(10).pow(18));
+
+        const price = box.nft.price;
+        const priceBigNumber = BigNumber.from(price).mul(BigNumber.from(10).pow(DECIMAL));
+
+        // CHECK BALANCE OF ACCOUNT
+        const balance = await readContracts.ThetanCoin.balanceOf(yourAccount);
+        let balanceResult = balance.div(BigNumber.from(10).pow(DECIMAL));
+        console.log("balanceResult ", balanceResult.toNumber());
+        if (balanceResult.toNumber() < price) {
+          notification.error({
+            message: "Transaction Fail",
+            description: "You don't have enough balance to make transaction",
+          });
+          setIsLoadBuyBox(false);
+          return;
+        }
+
+        // GENERATE SIGNATURE FROM BACKEND
+        dispatch(
+          getSignatureWhenBuyBox({
+            params: {
+              id: id,
+              user: yourAccount,
+              price: price,
+              paymentErc20: readContracts.ThetanCoin.address,
+            },
+            onSuccess: async data => {
+              const signature = data.signature;
+              if (signature) {
+                // CHECK ALLOW OFF ACCOUNT
+                const validBuy = await approveERC20(price, priceBigNumber);
+                if (validBuy) {
+                  // BUY BOX WITH SIGNATURE
+                  const result = await buyBox(id, priceBigNumber, signature);
+                  console.log("result ", result);
+                  if (result && result.hash) {
+                    updateNFTWhenBuy(id, result.hash);
+                  }
+                }
+              } else {
+                setIsLoadBuyBox(false);
+                notification.error({ message: "Error", description: "Generate Signature is error!" });
+              }
+            },
+            onError: err => {
+              setIsLoadBuyBox(false);
+            },
+          }),
+        );
+
+        // writeContracts.ThetanBoxHub.buyBoxWithSignature();
+      } else {
+        notification.error({ message: "Error", description: "writeContracts is null" });
+      }
+    } else {
+      router.push(LOGIN_PATH);
+    }
+  };
+
+  const approveERC20 = async (price, priceBigNumber) => {
+    const allow = await readContracts.ThetanCoin.allowance(yourAccount, readContracts.ThetanCoin.address);
+    const allowResult = allow / Math.pow(10, DECIMAL);
+
+    let validBuy = true;
+    if (allowResult < price) {
+      validBuy = false;
+      // APPROVE ERC20 ACCOUNT
+      const approve = await tx(writeContracts.ThetanCoin.approve(readContracts.ThetanBoxHub.address, priceBigNumber));
+      if (approve && approve.hash) {
+        validBuy = true;
+      }
+    }
+    if (!validBuy) {
+      setIsLoadBuyBox(false);
+    }
+    return validBuy;
+  };
+
+  const buyBox = async (id, priceBigNumber, signature) => {
+    const result = await tx(
+      writeContracts.ThetanBoxHub.buyBoxWithSignature(id, priceBigNumber, readContracts.ThetanCoin.address, signature),
+    );
+    if (!result) {
+      setIsLoadBuyBox(false);
+    }
+    return result;
+  };
+  const updateNFTWhenBuy = (boxId, hash) => {
+    dispatch(
+      updateNFT({
+        params: {
+          id: boxId,
+          state: STATE_NFT.Game,
+          hashNFT: hash,
+        },
+        onSuccess: data => {
+          setIsLoadBuyBox(false);
+          showDialogSucces();
+        },
+        onError: err => {
+          setIsLoadBuyBox(false);
+        },
+      }),
+    );
+  };
+  const showDialogSucces = () => {
+    Modal.success({
+      content: "Buy Box success",
+      onOk() {
+        router.replace(MARKETING_PATH);
+      },
+    });
+  };
   return (
     <>
       <div className="py-5 md:py-[50px] max-w-screen-2xl mx-auto">
@@ -31,7 +168,7 @@ function DetailMysteryBox({ web3, box }) {
             <div className="mt-5 md:mt-[80px] grid md:grid-cols-2 gap-[2%]">
               <div
                 className="bg-[url('/item-detail-bg.png')] max-w-full bg-center bg-no-repeat 
-          py-20 px-16 md:max-w-[720px] md:mr-20"
+          py-20 px-16 md:max-w-[720px] md:mr-20 flex justify-center"
                 style={{ backgroundSize: "100% 100%" }}
               >
                 <Image className="mx-auto" height={200} width={200} src={box.img} />
@@ -39,7 +176,7 @@ function DetailMysteryBox({ web3, box }) {
               <div className="flex flex-col">
                 <span className="font-extrabold text-3xl md:text-[40px] text-white">{box.name}</span>
                 <div className="flex items-center mt-5">
-                  <span class="text-white text-[25px] border-[#F7AE4E] border-[1px] border-solid rounded-[4px] px-5 py-1">
+                  <span className="text-white text-[25px] border-[#F7AE4E] border-[1px] border-solid rounded-[4px] px-5 py-1">
                     ID #{box.id}
                   </span>
                 </div>
@@ -51,13 +188,11 @@ function DetailMysteryBox({ web3, box }) {
                 {box.nft.addressOwner && (
                   <span className="text-sm md:text-base text-white">Sold by: {box.nft.addressOwner}</span>
                 )}
-                <button className="uppercase bg-yellow-500 text-black border-[1px] border-[#F7AE4E] border-solid text-[25px] px-5 rounded-[4px] font-kidgame mt-8 py-1">
-                  buy this item
-                </button>
+                <ButtonLoading text={"buy item"} isLoadBuyBox={isLoadBuyBox} onClick={onClickBuyItem} />
               </div>
             </div>
-            <div class="mt-20 border-[#F7AE4E] border-[1px] border-solid rounded-[10px] p-8">
-              <span _ngcontent-vfl-c56="" class="text-yellow-500 text-xl md:text-[30px] font-bold ">
+            <div className="mt-20 border-[#F7AE4E] border-[1px] border-solid rounded-[10px] p-8">
+              <span _ngcontent-vfl-c56="" className="text-yellow-500 text-xl md:text-[30px] font-bold ">
                 {" "}
                 Product description{" "}
               </span>
@@ -95,4 +230,4 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async cont
     };
   }
 });
-export default DetailMysteryBox;
+export default Web3Consumer(DetailMysteryBox);

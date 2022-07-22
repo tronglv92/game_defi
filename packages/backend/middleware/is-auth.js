@@ -22,5 +22,6 @@ module.exports = (req, res, next) => {
   }
   console.log("decodedToken ", decodedToken);
   req.userId = decodedToken.payload.id.toString();
+  req.publicAddress = decodedToken.payload.publicAddress;
   next();
 };

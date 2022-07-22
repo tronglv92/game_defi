@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MenuId, MENU_ID, WalletId } from "../../constants/key";
 
 import { Web3Consumer } from "../../helpers/connectAccount/Web3Context";
@@ -11,7 +11,14 @@ import icMysteryBox from "../../public/ic-mystery-box.svg";
 import icMarketPlace from "../../public/ic-marketplace.svg";
 import { MenuOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
-import { MARKETING_PATH, MYSTERY_BOX_PATH } from "../../constants/path";
+import {
+  BUY_TOKEN_PATH,
+  LOGIN,
+  LOGIN_PATH,
+  MARKETING_PATH,
+  MYSTERY_BOX_PATH,
+  MY_BOXES_PATH,
+} from "../../constants/path";
 const { Header, Content, Footer } = Layout;
 function getItem(label, key, icon, children) {
   return {
@@ -21,19 +28,16 @@ function getItem(label, key, icon, children) {
     label,
   };
 }
-const items = [
+const items = [getItem("Weapon", MENU_ID.Weapons), getItem("Mystery Boxes", MENU_ID.MysteryBoxes)];
+const itemsWhenLogin = [
   getItem("Weapon", MENU_ID.Weapons),
   getItem("Mystery Boxes", MENU_ID.MysteryBoxes),
-
-  // getItem("User", "sub1", <UserOutlined />, [getItem("Tom", "3"), getItem("Bill", "4"), getItem("Alex", "5")]),
-  // getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "6"), getItem("Team 2", "8")]),
-  // getItem("Files", "9", <FileOutlined />),
+  getItem("My Boxes", MENU_ID.MyBoxes),
 ];
 function LayoutView({ children, web3 }) {
   const {
-    logoutOfWeb3Modal,
-    showModalLogin,
-    setShowModalLogin,
+    logout,
+
     onLogin,
     showModalDisplayNetWork,
     setShowModalDisplayNetWork,
@@ -41,10 +45,12 @@ function LayoutView({ children, web3 }) {
     loginCryto,
     library,
     walletIdSelected,
+    yourAccount,
   } = web3;
 
   const router = useRouter();
   const [visible, setVisible] = useState(false);
+
   const showDrawer = () => {
     setVisible(true);
   };
@@ -54,26 +60,30 @@ function LayoutView({ children, web3 }) {
   };
   const onClickMenu = menu => {
     const { item, key, keyPath, domEvent } = menu;
-    console.log("menu ", menu);
-    console.log("router ", router);
-    const path = router.asPath;
+
     switch (key) {
       case MENU_ID.Weapons:
-        if (path != MARKETING_PATH) {
-          router.push({
-            pathname: MARKETING_PATH,
-          });
-        }
+        navigateTo(MARKETING_PATH);
+
         break;
       case MENU_ID.MysteryBoxes:
-        if (path != MYSTERY_BOX_PATH) {
-          router.push({
-            pathname: MYSTERY_BOX_PATH,
-          });
-        }
+        navigateTo(MYSTERY_BOX_PATH);
         break;
+      case MENU_ID.MyBoxes:
+        navigateTo(MY_BOXES_PATH);
+
+        break;
+
       default:
         break;
+    }
+  };
+  const navigateTo = page => {
+    const path = router.asPath;
+    if (path != page) {
+      router.push({
+        pathname: page,
+      });
     }
   };
   const getSelectedMenu = () => {
@@ -86,12 +96,15 @@ function LayoutView({ children, web3 }) {
     const asPathNestedRoutes = asPathWithoutQuery.split("/").filter(v => v.length > 0);
 
     if (asPathNestedRoutes.length > 0) {
-      switch (asPathNestedRoutes[0]) {
-        case "marketing":
+      switch ("/" + asPathNestedRoutes[0]) {
+        case MARKETING_PATH:
           selectedMenu = MENU_ID.Weapons;
           break;
-        case "mystery-box":
+        case MYSTERY_BOX_PATH:
           selectedMenu = MENU_ID.MysteryBoxes;
+          break;
+        case MY_BOXES_PATH:
+          selectedMenu = MENU_ID.MyBoxes;
           break;
         default:
           selectedMenu = MENU_ID.Weapons;
@@ -100,6 +113,7 @@ function LayoutView({ children, web3 }) {
     }
     return selectedMenu;
   };
+
   const selectedMenu = getSelectedMenu();
   const isMobile = useMediaQuery({ query: `(max-width: 768px)` });
   return (
@@ -131,25 +145,25 @@ function LayoutView({ children, web3 }) {
               zIndex: 1,
               width: "100%",
             }}
-            className="flex flex-row justify-between items-center"
+            className="flex flex-row  items-center"
           >
-            <Row align="middle">
-              <div />
+            <div className="flex-1 flex">
               <Menu
                 theme="dark"
                 mode="horizontal"
+                style={{ flex: 1 }}
                 defaultSelectedKeys={[selectedMenu]}
-                items={items}
+                items={yourAccount ? itemsWhenLogin : items}
                 onClick={onClickMenu}
               />
-            </Row>
+            </div>
 
             <Account
               {...web3}
               onConnect={() => {
-                setShowModalLogin(true);
+                router.push(LOGIN_PATH);
               }}
-              onLogout={logoutOfWeb3Modal}
+              onLogout={logout}
             />
           </Header>
         )}
@@ -178,15 +192,7 @@ function LayoutView({ children, web3 }) {
           Ant Design ©2018 Created by Ant UED
         </Footer>
       </Layout>
-      {showModalLogin == true && (
-        <ModalLogin
-          setShowModalLogin={setShowModalLogin}
-          onLogin={wallet => {
-            console.log("ModalLogin wallet ", wallet);
-            onLogin(wallet);
-          }}
-        />
-      )}
+
       {showModalDisplayNetWork == true && (
         <ModalNetworkDisplay
           walletIdSelected={walletIdSelected}

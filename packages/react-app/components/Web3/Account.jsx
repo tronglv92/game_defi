@@ -1,6 +1,8 @@
 import { useWeb3React } from "@web3-react/core";
 import { Button, Row } from "antd";
+import { useContractReader } from "eth-hooks";
 import React from "react";
+import { useState } from "react";
 
 import Address from "./Address";
 import Balance from "./Balance";
@@ -22,7 +24,7 @@ import Wallet from "./Wallet";
     price={price}
     web3Modal={web3Modal}
     loadWeb3Modal={loadWeb3Modal}
-    logoutOfWeb3Modal={logoutOfWeb3Modal}
+    logout={logout}
     blockExplorer={blockExplorer}
   />
 
@@ -51,7 +53,19 @@ export default function Account({
   onConnect,
   onLogout,
   yourLocalBalance,
+  readContracts,
 }) {
+  // const [balanceERC20, setBalanceERC20] = useState("0");
+  let balaceERC20 = "0";
+  if (yourAccount && readContracts) {
+    const numberErc20 = useContractReader(readContracts, "ThetanCoin", "balanceOf", [yourAccount]);
+
+    if (numberErc20) {
+      console.log("numberErc20 ", numberErc20.toString());
+      balaceERC20 = numberErc20 / Math.pow(10, 18);
+    }
+  }
+
   const modalButtons = [];
   if (yourAccount) {
     modalButtons.push(
@@ -91,7 +105,7 @@ export default function Account({
       ) : (
         "Connecting..."
       )}
-      <Balance address={yourAccount} provider={localProvider} price={price} yourLocalBalance={yourLocalBalance} />
+      <Balance address={yourAccount} provider={localProvider} yourBalanceERC20={balaceERC20} />
       <Wallet
         address={yourAccount}
         provider={localProvider}

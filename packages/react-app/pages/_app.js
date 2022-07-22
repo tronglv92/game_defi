@@ -1,6 +1,6 @@
 import "../styles/index.css";
 import "antd/dist/antd.css";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Web3Provider as Web3ContextProvider } from "../helpers/connectAccount/Web3Context";
 import { Web3ReactProvider } from "@web3-react/core";
 
@@ -31,6 +31,7 @@ function MyApp({ Component, pageProps }) {
       });
     }
   }, []);
+
   function getLibrary(provider) {
     console.log("provider ", provider);
     const library = new ethers.providers.Web3Provider(provider, "any");
@@ -39,7 +40,7 @@ function MyApp({ Component, pageProps }) {
   }
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
-      <Web3ContextProvider network="localhost">
+      <Web3ContextProvider network="rinkeby">
         <ThemeProvider attribute="class">
           <>
             <Head>

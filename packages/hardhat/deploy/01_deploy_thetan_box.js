@@ -4,16 +4,24 @@
 const { ethers } = require("hardhat");
 
 const localChainId = "31337";
+const paymentReceivedAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
-  await deploy("YourContract", {
+  await deploy("ThetanBoxHub", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     //args: [ "Hello", ethers.utils.parseEther("1.5") ],
     log: true,
   });
+  const thetanBoxHub = await ethers.getContract("ThetanBoxHub", deployer);
+  await thetanBoxHub.setSigner(deployer, { gasLimit: 300000 });
+  console.log("signer ", deployer);
 
+  await thetanBoxHub.setPaymentReceivedAddress(paymentReceivedAddress, {
+    gasLimit: 300000,
+  });
+  console.log("paymentReceivedAddress ", paymentReceivedAddress);
   /*
     // Getting a previously deployed contract
     const YourContract = await ethers.getContract("YourContract", deployer);
@@ -50,4 +58,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   });
   */
 };
-module.exports.tags = ["YourContract"];
+module.exports.tags = ["ThetanBoxHub"];

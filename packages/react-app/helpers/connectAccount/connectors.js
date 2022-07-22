@@ -20,7 +20,7 @@ const RPC_URLS = {
 };
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 3, 4, 5, 42, 31337],
+  supportedChainIds: [1, 3, 4, 5, 42, 31337, 56],
 });
 export const walletconnect = new WalletConnectConnector({
   rpc: RPC_URLS,
@@ -37,7 +37,7 @@ export function resetWalletConnector(connector) {
 export const walletlink = new WalletLinkConnector({
   url: RPC_URLS[1],
   appName: "game defi",
-  supportedChainIds: [1, 3, 4, 5, 42, 10, 137, 69, 420, 80001, 31337],
+  supportedChainIds: [1, 3, 4, 5, 42, 10, 137, 69, 420, 80001, 31337, 56],
 });
 
 export const connectorsByName = {

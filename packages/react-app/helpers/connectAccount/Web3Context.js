@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from "react"
 
 import { INFURA_ID, NETWORKS, ALCHEMY_KEY, NETWORK } from "../../constants";
 import { Transactor } from "..";
-import { useContractLoader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
+import { useContractLoader, useContractReader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 
 // contracts
@@ -23,6 +23,8 @@ import { useBalance } from "../../hooks/useBalance";
 import lib from "@ant-design/icons";
 import _ from "lodash";
 import { useEagerConnectLogin } from "./ConnectHook";
+import { useRouter } from "next/router";
+import { MARKETING_PATH } from "../../constants/path";
 const { ethers, BigNumber } = require("ethers");
 
 // create our app context
@@ -34,7 +36,7 @@ export function Web3Provider({ children, ...props }) {
   if (!global.window) {
     return null;
   }
-
+  const router = useRouter();
   const { network = "localhost", DEBUG = true, NETWORKCHECK = true } = props;
   const { active, account, library, connector, chainId, activate, deactivate } = useWeb3React();
   // app states
@@ -42,10 +44,10 @@ export function Web3Provider({ children, ...props }) {
   const [yourLocalBalance, setYourLocalBalance] = useState(BigNumber.from(0));
   // const [yourAccount, setYourAccount] = useState();
   const [walletIdSelected, setWalletIdSelected] = useState();
-  const [showModalLogin, setShowModalLogin] = useState(false);
+  // const [showModalLogin, setShowModalLogin] = useState(false);
   const [showModalDisplayNetWork, setShowModalDisplayNetWork] = useState(false);
   const [state, setState] = useState({});
-
+  const [historyRoute, setHistoryRoute] = useState([]);
   // const [address, setAddress] = useState();
 
   /// 📡 What chain are your contracts deployed to?
@@ -124,6 +126,7 @@ export function Web3Provider({ children, ...props }) {
       setYourLocalBalance(BigNumber.from(0));
     }
   };
+
   const isNetworkSelected = chainId => {
     console.log("NETWORKS[network].chainId ", NETWORKS[network].chainId);
     return chainId == NETWORKS[network].chainId;
@@ -147,6 +150,7 @@ export function Web3Provider({ children, ...props }) {
       setYourLocalBalance(BigNumber.from(0));
     }
   }, [library, yourAccount, chainId]);
+
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
   // const yourLocalBalance = useBalance(localProvider, account);
 
@@ -176,6 +180,7 @@ export function Web3Provider({ children, ...props }) {
   useOnBlock(localProvider, () => {
     getBalance();
   });
+
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
   console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
@@ -216,6 +221,10 @@ export function Web3Provider({ children, ...props }) {
     writeContracts,
     mainnetContracts,
   ]);
+  useEffect(() => {
+    let historyCopy = [...historyRoute, router.asPath];
+    setHistoryRoute(historyCopy);
+  }, [router.asPath]);
   // const clearAccount = () => {
   //   setLocal(LS_KEY, null);
   //   setYourAccount(null);
@@ -244,16 +253,10 @@ export function Web3Provider({ children, ...props }) {
         description: msgError,
       });
     }
-    setShowModalLogin(false);
   };
-  const logoutOfWeb3Modal = async () => {
-    // await web3Modal.clearCachedProvider();
-    // if (injectedProvider && injectedProvider.provider && typeof injectedProvider.provider.disconnect == "function") {
-    //   await injectedProvider.provider.disconnect();
-    // }
-
-    // logoutAccount();
+  const logout = async () => {
     deactivate();
+    router.replace(MARKETING_PATH);
   };
   // const triedEager = useEagerConnect();
 
@@ -281,17 +284,17 @@ export function Web3Provider({ children, ...props }) {
 
     library,
     onLogin,
-    logoutOfWeb3Modal,
+    logout,
     yourLocalBalance,
     contractConfig,
     targetNetwork,
-    showModalLogin,
-    setShowModalLogin,
+
     showModalDisplayNetWork,
     setShowModalDisplayNetWork,
     yourAccount,
     // loginCryto,
     walletIdSelected,
+    historyRoute,
   };
 
   return <Web3Context.Provider value={providerProps}>{mounted && children}</Web3Context.Provider>;

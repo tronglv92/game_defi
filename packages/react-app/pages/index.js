@@ -20,8 +20,8 @@ function Home({ web3 }) {
     price,
     tx,
   } = web3;
-  const purpose = useContractReader(readContracts, "YourContract", "purpose");
-  const number = useContractReader(readContracts, "YourContract", "number");
+
+  // const number = useContractReader(readContracts, "ThetanCoin", "balanceOf");
   const items = [1, 2, 3, 4, 5, 6, 7, 9];
   const isMobile = useMediaQuery({ query: `(max-width: 760px)` });
   const [visibleFilter, setVisibleFilter] = useState(false);

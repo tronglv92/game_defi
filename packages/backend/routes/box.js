@@ -41,9 +41,25 @@ router.post(
   boxController.editBox
 );
 router.get("/getAllBox", boxController.getAllBox);
+router.get("/getMyBoxes", isAuth, boxController.getMyBoxes);
 router.get(
   "/getBox/:id",
   [param("id", "Id is empty").trim().not().isEmpty()],
   boxController.getBox
+);
+router.post(
+  "/updateNFT/:id",
+  isAuth,
+  [
+    param("id", "Id is empty").trim().not().isEmpty(),
+    body("state", "State is must number").trim().isNumeric(),
+    body("hashNFT", "HashNFT is must not empty").trim().not().isEmpty(),
+  ],
+  boxController.updateNFT
+);
+router.get(
+  "/getSignature",
+
+  boxController.getSignature
 );
 module.exports = router;

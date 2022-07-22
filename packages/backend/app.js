@@ -18,7 +18,8 @@ const boxRouter = require("./routes/box");
 const uploadRouter = require("./routes/upload");
 const ApiError = require("./utils/ApiError");
 const httpStatus = require("http-status");
-
+const SubscribeEvent = require("./subscribe/subscribe_event");
+SubscribeEvent();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 

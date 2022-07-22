@@ -35,6 +35,9 @@ export const boxSlice = createSlice({
     },
 
     getBoxById: (state, action) => {},
+    getSignatureWhenBuyBox: (state, action) => {},
+    getMyBoxes: (state, action) => {},
+    updateNFT: (state, action) => {},
   },
 });
 
@@ -45,7 +48,9 @@ export const {
   getAllBoxesSuccess,
   getAllBoxesError,
   getBoxById,
-  editBox,
+  getMyBoxes,
+  getSignatureWhenBuyBox,
+  updateNFT,
 } = boxSlice.actions;
 
 export default boxSlice.reducer;

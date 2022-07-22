@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useBalance } from "eth-hooks";
+import { useBalance, useContractReader } from "eth-hooks";
 
 const { utils } = require("ethers");
 
@@ -30,36 +30,28 @@ const { utils } = require("ethers");
 */
 
 export default function Balance(props) {
-  const [dollarMode, setDollarMode] = useState(true);
+  const { yourBalanceERC20 } = props;
 
   // const [listening, setListening] = useState(false);
 
   // const balance = useBalance(props.provider, props.address);
-  const { yourLocalBalance } = props;
-  let floatBalance = parseFloat("0.00");
 
-  let usingBalance = yourLocalBalance;
+  let floatBalance = parseFloat(yourBalanceERC20);
 
-  if (typeof props.balance !== "undefined") {
-    usingBalance = props.balance;
-  }
-  if (typeof props.value !== "undefined") {
-    usingBalance = props.value;
-  }
-
-  if (usingBalance) {
-    const etherBalance = utils.formatEther(usingBalance);
-    parseFloat(etherBalance).toFixed(2);
-    floatBalance = parseFloat(etherBalance);
-  }
+  // if (typeof props.balance !== "undefined") {
+  //   usingBalance = props.balance;
+  // }
+  // if (typeof props.value !== "undefined") {
+  //   usingBalance = props.value;
+  // }
 
   let displayBalance = floatBalance.toFixed(4);
 
-  const price = props.price || props.dollarMultiplier;
+  // const price = props.price || props.dollarMultiplier;
 
-  if (price && dollarMode) {
-    displayBalance = "$" + (floatBalance * price).toFixed(2);
-  }
+  // if (price && dollarMode) {
+  //   displayBalance = "$" + (floatBalance * price).toFixed(2);
+  // }
 
   return (
     <span
@@ -67,10 +59,6 @@ export default function Balance(props) {
         verticalAlign: "middle",
         fontSize: props.size ? props.size : 24,
         padding: 8,
-        cursor: "pointer",
-      }}
-      onClick={() => {
-        setDollarMode(!dollarMode);
       }}
     >
       {displayBalance}

@@ -1,7 +1,7 @@
 const NFT = require("../models/nft");
 const NftItem = require("../models/nft_item");
 const { validationResult } = require("express-validator/check");
-
+const ethUtil = require("ethereumjs-util");
 const catchAsync = require("../utils/catchAsync");
 const ApiSuccess = require("../utils/ApiSuccess");
 const ApiError = require("../utils/ApiError");
@@ -10,7 +10,10 @@ const httpStatus = require("http-status");
 const pick = require("../utils/pick");
 const getDelta = require("../utils/delta");
 const sequelize = require("../helper/db");
-
+const ethers = require("ethers");
+const web3 = require("web3");
+const BigNumber = require("big-number");
+const { DECIMAL, STATE_NFT } = require("../contracts/constant");
 exports.createBox = catchAsync(async (req, res, next) => {
   const errors = validationResult(req);
 
@@ -58,6 +61,39 @@ exports.getAllBox = catchAsync(async (req, res, next) => {
       },
       {
         model: NFT,
+        where: {
+          state: STATE_NFT.Market,
+        },
+      },
+    ],
+    limit: parseInt(perPage),
+    offset: parseInt((currentPage - 1) * perPage),
+    distinct: true,
+  });
+  const data = { items: items };
+  return ApiSuccess(res, data);
+});
+exports.getMyBoxes = catchAsync(async (req, res, next) => {
+  const currentPage = req.query.page || 1;
+  const perPage = req.query.limit || 10;
+  const publicAddress = req.publicAddress;
+
+  const items = await NftItem.findAndCountAll({
+    where: { box: true },
+    // order: [...],
+    include: [
+      {
+        model: ItemInBox,
+        // where: {
+        //   speed: 1.04,
+        // },
+      },
+      {
+        model: NFT,
+        where: {
+          state: STATE_NFT.Game,
+          addressOwner: publicAddress,
+        },
       },
     ],
     limit: parseInt(perPage),
@@ -171,4 +207,68 @@ exports.editBox = catchAsync(async (req, res, next) => {
     .catch((err) => {
       throw new ApiError(400, err);
     });
+});
+exports.getSignature = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  errors.formatWith;
+  if (!errors.isEmpty()) {
+    throw new ApiError(httpStatus.UNPROCESSABLE_ENTITY, errors.array()[0].msg);
+  }
+  const { id, price, paymentErc20, user } = req.query;
+  //hash the data
+
+  const priceBigNumber = ethers.utils.parseUnits(price, DECIMAL);
+
+  const hash = ethers.utils.solidityKeccak256(
+    ["address", "uint256", "uint256", "address"],
+    [user, id, priceBigNumber, paymentErc20]
+  );
+  console.log("hash ", hash);
+
+  //prefix the hash
+  const prefixedHash = ethUtil.hashPersonalMessage(ethUtil.toBuffer(hash));
+  console.log(
+    "process.env.PRIVATE_KEY_ACCOUNT ",
+    process.env.PRIVATE_KEY_ACCOUNT
+  );
+  //get the ECDSA signature and its r,s,v parameters
+  const privateKey = Buffer.from(process.env.PRIVATE_KEY_ACCOUNT, "hex");
+  const { r, s, v } = ethUtil.ecsign(prefixedHash, privateKey);
+  const signature = `0x${r.toString("hex")}${s.toString("hex")}${v.toString(
+    16
+  )}`;
+  console.log("signature ", signature);
+
+  // const signer = new ethers.Wallet("0x" + process.env.PRIVATE_KEY_ACCOUNT); // replace abc with your private key
+  // let message = ethers.utils.solidityPack(
+  //   ["uint256", "address", "uint256", "address"],
+  //   [id, user, price, paymentErc20]
+  // );
+  // message = ethers.utils.solidityKeccak256(["bytes"], [message]);
+  // const signature = await signer.signMessage(ethers.utils.arrayify(message));
+  const data = { signature };
+  return ApiSuccess(res, data);
+});
+exports.updateNFT = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  errors.formatWith;
+  if (!errors.isEmpty()) {
+    throw new ApiError(httpStatus.UNPROCESSABLE_ENTITY, errors.array()[0].msg);
+  }
+  const { id } = req.params;
+  const hashNFT = req.body.hashNFT;
+  // const buyer = req.body.buyer;
+  const state = req.body.state;
+
+  const item = await NFT.findOne({
+    where: { nftItemId: parseInt(id) },
+    // order: [...],
+    include: [],
+  });
+
+  item.state = state;
+  item.hashNFT = hashNFT;
+  item.save();
+  const data = { item: item };
+  return ApiSuccess(res, data);
 });

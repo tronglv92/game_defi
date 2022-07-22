@@ -15,6 +15,7 @@ axiosClient.interceptors.request.use(
   function (config) {
     // Do something before request is sent
     const auth = getAuth();
+    console.log("auth ", auth);
     if (auth) {
       config.headers["Authorization"] = "bearer " + auth.token;
     }
