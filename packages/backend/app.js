@@ -19,7 +19,9 @@ const uploadRouter = require("./routes/upload");
 const ApiError = require("./utils/ApiError");
 const httpStatus = require("http-status");
 const SubscribeEvent = require("./subscribe/subscribe_event");
+const SubscribeMarketEvent = require("./subscribe/subscribe_market");
 SubscribeEvent();
+SubscribeMarketEvent();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 

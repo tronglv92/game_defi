@@ -5,6 +5,7 @@ import counter from "./counter/counterSlice";
 import weapon from "./weapon/weaponSlice";
 import box from "./box/boxSlice";
 import myBox from "./myBox/myBoxSlice";
+import myWeapons from "./myWeapons/myWeaponsSlice";
 import createSagaMiddleware, { END } from "redux-saga";
 import rootSaga from "./rootSaga";
 const sagaMiddleware = createSagaMiddleware();
@@ -14,6 +15,7 @@ const combinedReducer = combineReducers({
   weapon,
   box,
   myBox,
+  myWeapons,
 });
 const masterReducer = (state, action) => {
   if (action.type === HYDRATE) {

@@ -21,8 +21,6 @@ function Home({ web3 }) {
     tx,
   } = web3;
 
-  // const number = useContractReader(readContracts, "ThetanCoin", "balanceOf");
-  const items = [1, 2, 3, 4, 5, 6, 7, 9];
   const isMobile = useMediaQuery({ query: `(max-width: 760px)` });
   const [visibleFilter, setVisibleFilter] = useState(false);
   // console.log("purpose ", purpose);

@@ -14,6 +14,7 @@ export const MENU_ID = {
   MysteryBoxes: "MysteryBoxes",
   BuyToken: "BuyToken",
   MyBoxes: "MyBoxes",
+  MyWeapons: "MyWeapons",
 };
 export const WEAPON_CLASS = {
   Sword: 0,

@@ -4,19 +4,23 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract ThetanHero is
+contract NftWeapon is
     ERC721,
     AccessControlEnumerable,
     ERC721Enumerable,
     Ownable
 {
+    using Counters for Counters.Counter;
+    Counters.Counter private tokenId;
+
     mapping(address => bool) public approvalWhitelists;
     mapping(uint256 => bool) public lockedTokens;
     string private _baseTokenURI;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-    constructor() ERC721("Thetan Hero", "THH") {}
+    constructor() ERC721("Trong Hero", "TH") {}
 
     function _baseURI() internal view virtual override returns (string memory) {
         return _baseTokenURI;
@@ -33,15 +37,18 @@ contract ThetanHero is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, uint256 tokenId) public virtual {
+    function mint(address to) public virtual returns (uint256) {
         require(
             hasRole(MINTER_ROLE, _msgSender()),
             "Must have minter role to mint"
         );
-        require(!_exists(tokenId), "Must have unique tokenId");
+        tokenId.increment();
+        uint256 currentId = tokenId.current();
+        require(!_exists(currentId), "Must have unique tokenId");
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
-        _mint(to, tokenId);
+        _mint(to, currentId);
+        return currentId;
     }
 
     /**
@@ -50,6 +57,7 @@ contract ThetanHero is
     function isApprovedForAll(address owner, address operator)
         public
         view
+        virtual
         override
         returns (bool)
     {
@@ -93,34 +101,34 @@ contract ThetanHero is
     /**
      * @dev Lock token to use in game or for rental
      */
-    function lock(uint256 tokenId) public {
+    function lock(uint256 _tokenId) public {
         require(
             approvalWhitelists[_msgSender()],
             "Must be valid approval whitelist"
         );
-        require(_exists(tokenId), "Must be valid tokenId");
-        require(!lockedTokens[tokenId], "Token has already locked");
-        lockedTokens[tokenId] = true;
+        require(_exists(_tokenId), "Must be valid tokenId");
+        require(!lockedTokens[_tokenId], "Token has already locked");
+        lockedTokens[_tokenId] = true;
     }
 
     /**
      * @dev Unlock token to use blockchain or sale on marketplace
      */
-    function unlock(uint256 tokenId) public {
+    function unlock(uint256 _tokenId) public {
         require(
             approvalWhitelists[_msgSender()],
             "Must be valid approval whitelist"
         );
-        require(_exists(tokenId), "Must be valid tokenId");
-        require(lockedTokens[tokenId], "Token has already unlocked");
-        lockedTokens[tokenId] = false;
+        require(_exists(_tokenId), "Must be valid tokenId");
+        require(lockedTokens[_tokenId], "Token has already unlocked");
+        lockedTokens[_tokenId] = false;
     }
 
     /**
      * @dev Get lock status
      */
-    function isLocked(uint256 tokenId) public view returns (bool) {
-        return lockedTokens[tokenId];
+    function isLocked(uint256 _tokenId) public view returns (bool) {
+        return lockedTokens[_tokenId];
     }
 
     /**
@@ -136,10 +144,10 @@ contract ThetanHero is
     function _beforeTokenTransfer(
         address from,
         address to,
-        uint256 tokenId
+        uint256 _tokenId
     ) internal virtual override(ERC721, ERC721Enumerable) {
-        require(!lockedTokens[tokenId], "Can not transfer locked token");
-        super._beforeTokenTransfer(from, to, tokenId);
+        require(!lockedTokens[_tokenId], "Can not transfer locked token");
+        super._beforeTokenTransfer(from, to, _tokenId);
     }
 
     /**

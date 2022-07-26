@@ -50,6 +50,7 @@ weaponRouter.get(
   ],
   weaponController.getWeapons
 );
+weaponRouter.get("/myWeapons", isAuth, weaponController.getMyWeapons);
 weaponRouter.get(
   "/getWeapon/:id",
   [param("id", "Id is empty").trim().not().isEmpty()],
@@ -81,5 +82,22 @@ weaponRouter.post(
     body("abilities.*.level", "Level abilities is empty").exists().isNumeric(),
   ],
   weaponController.editWeapon
+);
+weaponRouter.get(
+  "/getSignatureMint",
+  [query("id", "Id must be a number ").trim().isNumeric()],
+  weaponController.getSignatureMint
+);
+weaponRouter.post(
+  "/updateWhenMinted/:id",
+  isAuth,
+  [
+    param("id", "Id is empty").trim().not().isEmpty(),
+    body("state", "State is must number").trim().isNumeric(),
+    body("hashNFT", "HashNFT is must not empty").trim().not().isEmpty(),
+    body("buyer", "Buyer is must not empty").trim().not().isEmpty(),
+    body("minted", "Minted is must boolean").trim().isBoolean(),
+  ],
+  weaponController.updateWhenMinted
 );
 module.exports = weaponRouter;

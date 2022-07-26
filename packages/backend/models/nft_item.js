@@ -31,5 +31,10 @@ const NftItem = sequelize.define("nftItem", {
     allowNull: false,
     defaultValue: () => false,
   },
+  nonce: {
+    allowNull: false,
+    type: Sequelize.INTEGER,
+    defaultValue: () => Math.floor(Math.random() * 10000),
+  },
 });
 module.exports = NftItem;

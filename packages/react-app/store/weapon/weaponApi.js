@@ -18,3 +18,27 @@ export const getWeaponByIdApi = async params => {
 
   return result.data;
 };
+export const getSignatureMintApi = async params => {
+  const { id, nftAddress, paymentErc20, price, buyer } = params;
+  const url = `/weapon/getSignatureMint`;
+
+  let result = await axiosClient.get(url, {
+    params: {
+      id,
+      nftAddress,
+      paymentErc20,
+      price,
+      buyer,
+    },
+  });
+
+  return result.data;
+};
+export const updateMintWeaponApi = async params => {
+  const { id, state, hashNFT, minted, buyer } = params;
+  const url = `/weapon/updateWhenMinted/${id}`;
+
+  let result = await axiosClient.post(url, { state, hashNFT, minted, buyer });
+
+  return result.data;
+};

@@ -11,8 +11,7 @@ const pick = require("../utils/pick");
 const getDelta = require("../utils/delta");
 const sequelize = require("../helper/db");
 const ethers = require("ethers");
-const web3 = require("web3");
-const BigNumber = require("big-number");
+
 const { DECIMAL, STATE_NFT } = require("../contracts/constant");
 exports.createBox = catchAsync(async (req, res, next) => {
   const errors = validationResult(req);
@@ -228,7 +227,7 @@ exports.getSignature = catchAsync(async (req, res, next) => {
   //prefix the hash
   const prefixedHash = ethUtil.hashPersonalMessage(ethUtil.toBuffer(hash));
   console.log(
-    "process.env.PRIVATE_KEY_ACCOUNT ",
+    "process.env.localhost.PRIVATE_KEY_ACCOUNT ",
     process.env.PRIVATE_KEY_ACCOUNT
   );
   //get the ECDSA signature and its r,s,v parameters
@@ -256,9 +255,8 @@ exports.updateNFT = catchAsync(async (req, res, next) => {
     throw new ApiError(httpStatus.UNPROCESSABLE_ENTITY, errors.array()[0].msg);
   }
   const { id } = req.params;
-  const hashNFT = req.body.hashNFT;
+  const { hashNFT, state, buyer } = req.body;
   // const buyer = req.body.buyer;
-  const state = req.body.state;
 
   const item = await NFT.findOne({
     where: { nftItemId: parseInt(id) },
@@ -268,7 +266,8 @@ exports.updateNFT = catchAsync(async (req, res, next) => {
 
   item.state = state;
   item.hashNFT = hashNFT;
-  item.save();
+  item.addressOwner = buyer.toLowerCase();
+  await item.save();
   const data = { item: item };
   return ApiSuccess(res, data);
 });

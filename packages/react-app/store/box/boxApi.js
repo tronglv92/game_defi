@@ -17,10 +17,10 @@ export const getBoxByIdApi = async params => {
   return result.data;
 };
 export const updateNFTApi = async params => {
-  const { id, state, hashNFT } = params;
+  const { id, state, hashNFT, buyer } = params;
   const url = `/box/updateNFT/${id}`;
 
-  let result = await axiosClient.post(url, { state, hashNFT });
+  let result = await axiosClient.post(url, { state, hashNFT, buyer });
 
   return result.data;
 };

@@ -20,16 +20,14 @@ import ButtonLoading from "../../components/Views/ButtonLoading";
 function DetailMysteryBox({ web3, box }) {
   const { writeContracts, readContracts, yourAccount, setShowModalLogin, tx } = web3;
   const [isLoadBuyBox, setIsLoadBuyBox] = useState(false);
-  // balance = useContractReader(readContracts, "ThetanCoin", "balanceOf", [yourAccount]);
-  // allow = useContractReader(readContracts, "ThetanCoin", "allowance", [yourAccount, readContracts.ThetanCoin.address]);
+
   const router = useRouter();
   const dispatch = useDispatch();
   const onClickBuyItem = async () => {
     if (yourAccount) {
       if (writeContracts && readContracts) {
         setIsLoadBuyBox(true);
-        console.log("box ", box);
-        console.log("readContracts ", readContracts);
+
         const id = box.id;
 
         // const price = BigNumber.from(box.nft.price).mul(BigNumber.from(10).pow(18));
@@ -38,7 +36,7 @@ function DetailMysteryBox({ web3, box }) {
         const priceBigNumber = BigNumber.from(price).mul(BigNumber.from(10).pow(DECIMAL));
 
         // CHECK BALANCE OF ACCOUNT
-        const balance = await readContracts.ThetanCoin.balanceOf(yourAccount);
+        const balance = await readContracts.TrongCoin.balanceOf(yourAccount);
         let balanceResult = balance.div(BigNumber.from(10).pow(DECIMAL));
         console.log("balanceResult ", balanceResult.toNumber());
         if (balanceResult.toNumber() < price) {
@@ -57,7 +55,7 @@ function DetailMysteryBox({ web3, box }) {
               id: id,
               user: yourAccount,
               price: price,
-              paymentErc20: readContracts.ThetanCoin.address,
+              paymentErc20: readContracts.TrongCoin.address,
             },
             onSuccess: async data => {
               const signature = data.signature;
@@ -69,7 +67,7 @@ function DetailMysteryBox({ web3, box }) {
                   const result = await buyBox(id, priceBigNumber, signature);
                   console.log("result ", result);
                   if (result && result.hash) {
-                    updateNFTWhenBuy(id, result.hash);
+                    updateNFTWhenBuy(id, result.hash, yourAccount);
                   }
                 }
               } else {
@@ -82,8 +80,6 @@ function DetailMysteryBox({ web3, box }) {
             },
           }),
         );
-
-        // writeContracts.ThetanBoxHub.buyBoxWithSignature();
       } else {
         notification.error({ message: "Error", description: "writeContracts is null" });
       }
@@ -93,14 +89,14 @@ function DetailMysteryBox({ web3, box }) {
   };
 
   const approveERC20 = async (price, priceBigNumber) => {
-    const allow = await readContracts.ThetanCoin.allowance(yourAccount, readContracts.ThetanCoin.address);
+    const allow = await readContracts.TrongCoin.allowance(yourAccount, readContracts.TrongCoin.address);
     const allowResult = allow / Math.pow(10, DECIMAL);
 
     let validBuy = true;
     if (allowResult < price) {
       validBuy = false;
       // APPROVE ERC20 ACCOUNT
-      const approve = await tx(writeContracts.ThetanCoin.approve(readContracts.ThetanBoxHub.address, priceBigNumber));
+      const approve = await tx(writeContracts.TrongCoin.approve(readContracts.BoxHub.address, priceBigNumber));
       if (approve && approve.hash) {
         validBuy = true;
       }
@@ -113,26 +109,31 @@ function DetailMysteryBox({ web3, box }) {
 
   const buyBox = async (id, priceBigNumber, signature) => {
     const result = await tx(
-      writeContracts.ThetanBoxHub.buyBoxWithSignature(id, priceBigNumber, readContracts.ThetanCoin.address, signature),
+      writeContracts.BoxHub.buyBoxWithSignature(id, priceBigNumber, readContracts.TrongCoin.address, signature),
     );
     if (!result) {
       setIsLoadBuyBox(false);
     }
     return result;
   };
-  const updateNFTWhenBuy = (boxId, hash) => {
+  const updateNFTWhenBuy = (boxId, hash, buyer) => {
     dispatch(
       updateNFT({
         params: {
           id: boxId,
           state: STATE_NFT.Game,
           hashNFT: hash,
+          buyer: buyer,
         },
         onSuccess: data => {
           setIsLoadBuyBox(false);
           showDialogSucces();
         },
         onError: err => {
+          notification.error({
+            message: "Message",
+            description: err,
+          });
           setIsLoadBuyBox(false);
         },
       }),

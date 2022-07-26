@@ -59,6 +59,7 @@ router.post(
 );
 router.get(
   "/getSignature",
+  isAuth,
 
   boxController.getSignature
 );

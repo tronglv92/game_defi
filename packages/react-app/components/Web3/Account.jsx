@@ -58,7 +58,7 @@ export default function Account({
   // const [balanceERC20, setBalanceERC20] = useState("0");
   let balaceERC20 = "0";
   if (yourAccount && readContracts) {
-    const numberErc20 = useContractReader(readContracts, "ThetanCoin", "balanceOf", [yourAccount]);
+    const numberErc20 = useContractReader(readContracts, "TrongCoin", "balanceOf", [yourAccount]);
 
     if (numberErc20) {
       console.log("numberErc20 ", numberErc20.toString());

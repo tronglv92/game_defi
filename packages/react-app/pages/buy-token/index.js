@@ -1,14 +1,7 @@
 import React, { useContext, useState } from "react";
-import { useRouter } from "next/router";
-import { MYSTERY_BOX_DETAIL_PATH } from "../../constants/path";
-import { getAllBoxApi } from "../../store/box/boxApi";
-import { getAllBoxes, getAllBoxesSuccess } from "../../store/box/boxSlice";
+
 import { Button, Input, Pagination } from "antd";
-import { wrapper } from "../../store/store";
-import { useDispatch, useSelector } from "react-redux";
-import Image from "next/image";
-import Link from "next/link";
-import { formatCurrency } from "../../helpers/helper";
+
 const NumericInput = props => {
   const { value, onChange } = props;
 

@@ -5,8 +5,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "hardhat/console.sol";
 
-contract ThetanBoxHub is Ownable {
+contract BoxHub is Ownable {
     /* ========== LIBs ========== */
 
     using SafeERC20 for IERC20;
@@ -69,10 +70,7 @@ contract ThetanBoxHub is Ownable {
     /* ========== WRITE FUNCTIONS ========== */
 
     function setSigner(address _signer) external onlyOwner {
-        require(
-            _signer != address(0),
-            "ThetanBoxPayment: invalid signer address"
-        );
+        require(_signer != address(0), "BoxHub: invalid signer address");
         signer = _signer;
     }
 
@@ -96,7 +94,7 @@ contract ThetanBoxHub is Ownable {
     ) external {
         require(
             tx.origin == msg.sender,
-            "ThetanBoxPayment: Only user address is allowed to buy box"
+            "BoxHub: Only user address is allowed to buy box"
         );
         require(signer != address(0), "Signer has not been set yet");
         // require(
@@ -104,10 +102,10 @@ contract ThetanBoxHub is Ownable {
         //     "ThetanBoxPayment: the signature is expired"
         // );
         // require(boxType > 0, "ThetanBoxPayment: Invalid box type");
-        require(price > 0, "ThetanBoxPayment: Invalid payment amount");
+        require(price > 0, "BoxHub: Invalid payment amount");
         require(
             !ids[id],
-            "ThetanBoxPayment: id is used. please send another transaction with new signature"
+            "BoxHub: id is used. please send another transaction with new signature"
         );
         verifyBuyBoxSignature(
             id,
@@ -124,10 +122,7 @@ contract ThetanBoxHub is Ownable {
             msg.sender,
             address(this)
         );
-        require(
-            allowToPayAmount >= price,
-            "ThetanBoxPayment: Invalid token allowance"
-        );
+        require(allowToPayAmount >= price, "BoxHub: Invalid token allowance");
         paymentToken.safeTransferFrom(
             msg.sender,
             paymentReceivedAddress,
@@ -214,9 +209,14 @@ contract ThetanBoxHub is Ownable {
         bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(
             criteriaMessageHash
         );
+
+        console.log(
+            "ECDSA.recover(ethSignedMessageHash, signature) ",
+            ECDSA.recover(ethSignedMessageHash, signature)
+        );
         require(
             ECDSA.recover(ethSignedMessageHash, signature) == signer,
-            "ThetanBoxPayment: invalid signature"
+            "BoxHub: invalid signature"
         );
     }
 }

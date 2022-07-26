@@ -22,11 +22,10 @@ function DetailMyBox({ web3 }) {
   const { writeContracts, readContracts, yourAccount, setShowModalLogin, tx } = web3;
   const [isLoadBuyBox, setIsLoadBuyBox] = useState(false);
   const [box, setBox] = useState(false);
-  // balance = useContractReader(readContracts, "ThetanCoin", "balanceOf", [yourAccount]);
-  // allow = useContractReader(readContracts, "ThetanCoin", "allowance", [yourAccount, readContracts.ThetanCoin.address]);
+
   const router = useRouter();
   const dispatch = useDispatch();
-  const queryKey = "id";
+
   const { id } = router.query;
   useEffect(() => {
     if (id) {

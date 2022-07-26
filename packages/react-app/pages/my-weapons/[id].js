@@ -18,151 +18,20 @@ import { getSignatureMintWeapon, updateMintWeapon } from "../../store/weapon/wea
 import { Web3Consumer } from "../../helpers/connectAccount/Web3Context";
 import { DECIMAL, STATE_NFT } from "../../constants/constant";
 import { BigNumber } from "ethers";
-function DetailWeapon({ web3, weapon }) {
+function DetailMyWeapon({ web3, weapon }) {
   const { readContracts, yourAccount, writeContracts, tx } = web3;
   const [isLoadBuyBox, setIsLoadBuyBox] = useState(false);
-  console.log("weapon ", weapon);
-  console.log("readContracts ", readContracts);
+
   const router = useRouter();
   const dispatch = useDispatch();
-  const onPressWeapon = () => {
+  const onPressSellWeapon = () => {
     if (yourAccount && writeContracts && readContracts) {
-      if (weapon.nft && weapon.nft.minted) {
-        onBuyWeapon();
-      } else {
-        onMintWeapon();
-      }
+    
     } else {
       router.push(LOGIN_PATH);
     }
   };
-  const onMintWeapon = async () => {
-    const { id } = weapon;
-    const price = weapon.nft.price;
-    const priceBigNumber = BigNumber.from(price).mul(BigNumber.from(10).pow(DECIMAL));
 
-    // CHECK BALANCE OF ACCOUNT
-    const balance = await readContracts.TrongCoin.balanceOf(yourAccount);
-    let balanceResult = balance.div(BigNumber.from(10).pow(DECIMAL));
-    console.log("balanceResult ", balanceResult.toNumber());
-
-    if (balanceResult.toNumber() < price) {
-      notification.error({
-        message: "Transaction Fail",
-        description: "You don't have enough balance to make transaction",
-      });
-      setIsLoadBuyBox(false);
-      return;
-    }
-    //GENERATE SIGNATURE FROM BACKEND
-    const nftAddress = readContracts.NftWeapon.address;
-    const paymentErc20 = readContracts.TrongCoin.address;
-    dispatch(
-      getSignatureMintWeapon({
-        params: {
-          id: id,
-          price: price,
-          paymentErc20: paymentErc20,
-          nftAddress: nftAddress,
-          buyer: yourAccount,
-        },
-        onSuccess: async data => {
-          const { signature, saltNonce } = data;
-          if (signature) {
-            // CHECK ALLOW OFF ACCOUNT
-            const validBuy = await approveERC20(price, priceBigNumber);
-            if (validBuy) {
-              // BUY BOX WITH SIGNATURE
-              const result = await mintWeapon({
-                id: id,
-                nftAddress: nftAddress,
-                paymentErc20: paymentErc20,
-                buyer: yourAccount,
-                saltNonce: saltNonce,
-                priceBigNumber: priceBigNumber,
-                signature: signature,
-              });
-              console.log("result ", result);
-              if (result && result.hash) {
-                //UPDATE NFT WEAPON WHEN MINT SUCCESS
-                updateNFTWhenMinted(id, result.hash, true, yourAccount);
-              }
-            }
-          } else {
-            setIsLoadBuyBox(false);
-            notification.error({ message: "Error", description: "Generate Signature is error!" });
-          }
-        },
-        onError: err => {
-          setIsLoadBuyBox(false);
-        },
-      }),
-    );
-  };
-
-  const onBuyWeapon = () => {};
-  const approveERC20 = async (price, priceBigNumber) => {
-    const allow = await readContracts.TrongCoin.allowance(yourAccount, readContracts.TrongCoin.address);
-    const allowResult = allow / Math.pow(10, DECIMAL);
-
-    let validBuy = true;
-    if (allowResult < price) {
-      validBuy = false;
-      // APPROVE ERC20 ACCOUNT
-      const approve = await tx(writeContracts.TrongCoin.approve(readContracts.Marketplace.address, priceBigNumber));
-      if (approve && approve.hash) {
-        validBuy = true;
-      }
-    }
-    if (!validBuy) {
-      setIsLoadBuyBox(false);
-    }
-    return validBuy;
-  };
-  const mintWeapon = async params => {
-    console.log("mintWeapon params ", params);
-    const { id, nftAddress, paymentErc20, buyer, saltNonce, priceBigNumber, signature } = params;
-
-    const addresses = [nftAddress, paymentErc20, buyer];
-    const values = [id, priceBigNumber, saltNonce];
-    const result = await tx(writeContracts.Marketplace.mintWithSignatures(addresses, values, signature));
-    if (!result) {
-      setIsLoadBuyBox(false);
-    }
-    return result;
-  };
-  const updateNFTWhenMinted = async (weaponId, hash, minted, buyer) => {
-    dispatch(
-      updateMintWeapon({
-        params: {
-          id: weaponId,
-          state: STATE_NFT.Game,
-          hashNFT: hash,
-          minted: minted,
-          buyer: buyer,
-        },
-        onSuccess: data => {
-          setIsLoadBuyBox(false);
-          showDialogMintSucces();
-        },
-        onError: err => {
-          notification.error({
-            message: "Message",
-            description: err,
-          });
-          setIsLoadBuyBox(false);
-        },
-      }),
-    );
-  };
-  const showDialogMintSucces = () => {
-    Modal.success({
-      content: "Mint Weapon success",
-      onOk() {
-        router.replace(MARKETING_PATH);
-      },
-    });
-  };
   return (
     <>
       <div className="py-5 md:py-[50px] max-w-screen-2xl mx-auto">
@@ -183,30 +52,14 @@ function DetailWeapon({ web3, weapon }) {
         {weapon ? (
           <div className="mt-8 md:mt-20 grid md:grid-cols-2 gap-10">
             <div sm={24} md={12} className="flex flex-col max-w-lg w-full mx-auto">
-              <div className="flex w-full justify-between mb-5">
-                <span
-                  className="bg-[url('/price-bg.png')] w-[160px] h-[40px] md:w-[165px] md:h-[56px] flex items-center 
-              justify-center text-base md:text-lg font-extrabold text-[#FFE368] mx-auto"
-                  style={{ backgroundSize: "100% 100%" }}
-                >
-                  {weapon.nft ? formatCurrency(weapon.nft.price) : 0} KWS
-                </span>
-                {/* <span
-                className="bg-[url('/price-bg.png')] w-[160px] h-[40px] md:w-[165px] md:h-[56px] flex items-center
-               justify-center text-base md:text-lg font-extrabold text-[rgba(33, 11, 6, 0.87)]"
-                style={{ backgroundSize: "100% 100%" }}
-              >
-                $1.31
-              </span> */}
-              </div>
               <Image className="max-w-[250px] mx-auto object-contain" src={weapon.img} height="300" width="300" />
               <img src="/stone-shelf.png" className="mx-auto max-w-full"></img>
               <div className="text-center mt-10">
                 <button
                   className="uppercase text-[16px] bg-[url('/sell-buy.png')]  w-[319px] h-[60px] text-[#FFC700] font-bold"
-                  onClick={onPressWeapon}
+                  onClick={onPressSellWeapon}
                 >
-                  {weapon.nft && weapon.nft.minted ? "Buy" : "Mint"}
+                  Sell
                 </button>
               </div>
             </div>
@@ -317,7 +170,7 @@ function DetailWeapon({ web3, weapon }) {
                   {weapon.itemAbilities.map((ability, index) => {
                     return (
                       <div className="mt-5 flex" key={index}>
-                        <Image className="object-contain " src={ability.img} height="70" width="70" />
+                        <Image className="object-contain min-w[70px]" src={ability.img} height="70" width="70" />
                         <div className="flex-1 flex-col ml-5">
                           <div className="flex justify-between align-middle">
                             <span className="text-[#F3D29C] text-[17px] font-extrabold flex justify-between ">
@@ -355,4 +208,4 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async cont
     };
   }
 });
-export default Web3Consumer(DetailWeapon);
+export default Web3Consumer(DetailMyWeapon);

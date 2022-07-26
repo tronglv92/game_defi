@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { useRouter } from "next/router";
-import { MYSTERY_BOX_DETAIL_PATH } from "../../constants/path";
+
 import { getAllBoxApi } from "../../store/box/boxApi";
 import { getAllBoxes, getAllBoxesSuccess } from "../../store/box/boxSlice";
 import { Pagination } from "antd";
@@ -16,11 +16,7 @@ function MysteryBox({ web3 }) {
   console.log("selector ", selector);
   const [pageSelect, setPageSelect] = useState(1);
   const router = useRouter();
-  const onClickBox = (item, index) => {
-    router.push({
-      pathname: MYSTERY_BOX_DETAIL_PATH,
-    });
-  };
+
   const onChangePage = (page, pageSize) => {
     console.log("onChangePage ", page, pageSize);
     setPageSelect(page);
@@ -44,12 +40,7 @@ function MysteryBox({ web3 }) {
             console.log("index ", index);
             return (
               <Link href={`/mystery-box/${item.id}`} key={index}>
-                <div
-                  className="bg-[#c4c4c429] rounded-[4px] p-5 w-full md:max-w-[315px] cursor-pointer flex flex-col"
-                  onClick={() => {
-                    onClickBox(item, index);
-                  }}
-                >
+                <div className="bg-[#c4c4c429] rounded-[4px] p-5 w-full md:max-w-[315px] cursor-pointer flex flex-col">
                   <div className="flex justify-between mb-5">
                     <span
                       className="text-sm font-semibold px-2 py-0 border-[1px]

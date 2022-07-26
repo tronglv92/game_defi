@@ -1,6 +1,5 @@
 const ethers = require("ethers");
-const { STATE_NFT } = require("../contracts/constant");
-const INFURA_PROJECT_ID = "ad68e0ca45d540ce8f91575d7057d029";
+const { STATE_NFT, INFURA_PROJECT_ID } = require("../contracts/constant");
 
 const deployedContracts = require("../contracts/hardhat_contracts.json");
 const NFT = require("../models/nft");
@@ -8,13 +7,13 @@ const NFT = require("../models/nft");
 const SubscribeEvent = async () => {
   console.log("SubscribeEvent");
   const provider = new ethers.providers.InfuraProvider.getWebSocketProvider(
-    "rinkeby",
+    process.env.NET_WORK,
     INFURA_PROJECT_ID
   );
   const { chainId, name } = await provider.getNetwork();
-  const abi = deployedContracts[chainId][name].contracts["ThetanBoxHub"].abi;
+  const abi = deployedContracts[chainId][name].contracts["BoxHub"].abi;
   const addressContract =
-    deployedContracts[chainId][name].contracts["ThetanBoxHub"].address;
+    deployedContracts[chainId][name].contracts["BoxHub"].address;
   let contract = new ethers.Contract(addressContract, abi, provider);
   contract.on("ThetanBoxPaid", (id, buyer, price, paymentToken, event) => {
     // Called when anyone changes the value

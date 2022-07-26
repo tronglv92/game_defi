@@ -12,6 +12,9 @@ const sequelize = require("../helper/db");
 const getDelta = require("../utils/delta");
 const { Op } = require("sequelize");
 const _ = require("lodash");
+const ethers = require("ethers");
+const ethUtil = require("ethereumjs-util");
+const { DECIMAL, STATE_NFT } = require("../contracts/constant");
 exports.getWeapons = catchAsync(async (req, res, next) => {
   console.log(" req.query ", req.query);
   const currentPage = req.query.page || 1;
@@ -33,7 +36,9 @@ exports.getWeapons = catchAsync(async (req, res, next) => {
       },
       {
         model: NFT,
-        where: {},
+        where: {
+          state: STATE_NFT.Market,
+        },
       },
     ],
     limit: parseInt(perPage),
@@ -57,6 +62,45 @@ exports.getWeapons = catchAsync(async (req, res, next) => {
   console.log("options ", options);
   const items = await NftItem.findAndCountAll(options);
   const data = { items: items };
+  return ApiSuccess(res, data);
+});
+exports.getMyWeapons = catchAsync(async (req, res, next) => {
+  const currentPage = req.query.page || 1;
+  const perPage = req.query.limit || 10;
+  const publicAddress = req.publicAddress;
+
+  const errors = validationResult(req);
+  errors.formatWith;
+  if (!errors.isEmpty()) {
+    throw new ApiError(httpStatus.BAD_REQUEST, errors.array()[0].msg);
+  }
+
+  const items = await NftItem.findAndCountAll({
+    where: { box: false },
+    // order: [...],
+    include: [
+      {
+        model: ItemStat,
+        // where: {
+        //   speed: 1.04,
+        // },
+      },
+      {
+        model: ItemAbilities,
+      },
+      {
+        model: NFT,
+        where: {
+          state: STATE_NFT.Game,
+          addressOwner: publicAddress,
+        },
+      },
+    ],
+    limit: parseInt(perPage),
+    offset: parseInt((currentPage - 1) * perPage),
+    distinct: true,
+  });
+  const data = { items: items ? items : [] };
   return ApiSuccess(res, data);
 });
 exports.getWeapon = catchAsync(async (req, res, next) => {
@@ -220,4 +264,70 @@ exports.editWeapon = catchAsync(async (req, res, next) => {
       console.log("edit Weapon err ", err);
       throw new ApiError(400, err);
     });
+});
+exports.getSignatureMint = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  errors.formatWith;
+  if (!errors.isEmpty()) {
+    throw new ApiError(httpStatus.UNPROCESSABLE_ENTITY, errors.array()[0].msg);
+  }
+  const { id, nftAddress, paymentErc20, price, buyer } = req.query;
+
+  const item = await NftItem.findByPk(id, {
+    include: [],
+  });
+  if (item) {
+    //hash the data
+
+    const priceBigNumber = ethers.utils.parseUnits(price, DECIMAL);
+
+    const saltNonce = item.nonce;
+    const hash = ethers.utils.solidityKeccak256(
+      ["address", "uint256", "address", "uint256", "address", "uint256"],
+      [nftAddress, id, paymentErc20, priceBigNumber, buyer, saltNonce]
+    );
+    console.log("hash ", hash);
+
+    //prefix the hash
+    const prefixedHash = ethUtil.hashPersonalMessage(ethUtil.toBuffer(hash));
+    console.log(
+      "process.env.localhost.PRIVATE_KEY_ACCOUNT ",
+      process.env.PRIVATE_KEY_ACCOUNT
+    );
+    //get the ECDSA signature and its r,s,v parameters
+    const privateKey = Buffer.from(process.env.PRIVATE_KEY_ACCOUNT, "hex");
+    const { r, s, v } = ethUtil.ecsign(prefixedHash, privateKey);
+    const signature = `0x${r.toString("hex")}${s.toString("hex")}${v.toString(
+      16
+    )}`;
+    console.log("signature ", signature);
+
+    item.nonce = Math.floor(Math.random() * 10000);
+    item.save();
+    const data = { signature, saltNonce };
+    return ApiSuccess(res, data);
+  } else {
+    throw new ApiError(400, "Can not find Weapon");
+  }
+});
+exports.updateWhenMinted = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  errors.formatWith;
+  if (!errors.isEmpty()) {
+    throw new ApiError(httpStatus.UNPROCESSABLE_ENTITY, errors.array()[0].msg);
+  }
+  const { id } = req.params;
+  const { hashNFT, minted, state, buyer } = req.body;
+  const item = await NFT.findOne({
+    where: { nftItemId: parseInt(id) },
+    // order: [...],
+    include: [],
+  });
+  item.state = state;
+  item.hashNFT = hashNFT;
+  item.minted = minted;
+  item.addressOwner = buyer.toLowerCase();
+  await item.save();
+  const data = { item: item };
+  return ApiSuccess(res, data);
 });

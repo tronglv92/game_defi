@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { MYSTERY_BOX_DETAIL_PATH } from "../../constants/path";
+
 import { getMyBoxesApi } from "../../store/myBox/myBoxApi";
 import { getMyBoxes, getMyBoxesSuccess } from "../../store/myBox/myBoxSlice";
 import { Pagination } from "antd";
@@ -46,8 +46,6 @@ function MyBoxes({ web3 }) {
 
         <div className="flex flex-wrap justify-center gap-5 mt-5 ">
           {boxes.map((item, index) => {
-            console.log("item ", item);
-            console.log("index ", index);
             return (
               <Link href={`/my-boxes/${item.id}`} key={index}>
                 <div className="bg-[#c4c4c429] rounded-[4px] p-5 w-full md:max-w-[315px] cursor-pointer flex flex-col">

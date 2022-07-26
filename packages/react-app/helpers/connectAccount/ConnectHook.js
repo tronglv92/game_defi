@@ -71,7 +71,7 @@ export function useEagerConnectLogin(props) {
     }
   };
   const handleCreateUser = publicAddress => {
-    console.log("JSON.stringify({ publicAddress }) ", JSON.stringify({ publicAddress }));
+    // console.log("JSON.stringify({ publicAddress }) ", JSON.stringify({ publicAddress }));
     return fetch(`${process.env.REACT_APP_BACKEND_URL}/users`, {
       body: JSON.stringify({ publicAddress }),
       headers: {

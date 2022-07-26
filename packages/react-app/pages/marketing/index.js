@@ -11,7 +11,7 @@ import Filter from "../../components/Web3/Filter";
 import { useMediaQuery } from "react-responsive";
 import { useRouter } from "next/router";
 
-import ItemWeapon from "../../components/Marketing/ItemWeapon";
+import ItemWeapon from "../../components/Views/Marketing/ItemWeapon";
 import { getWeaponsApi } from "../../store/weapon/weaponApi";
 import { getWeapons, getWeaponsSuccess } from "../../store/weapon/weaponSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,11 +29,12 @@ function Marketing({ web3 }) {
     price,
     tx,
   } = web3;
+
   const dispatch = useDispatch();
   const { weapons, limit, count } = useSelector(state => state.weapon);
   const [pageSelect, setPageSelect] = useState(1);
   const [filter, setFilter] = useState({});
-  console.log("Marketing weapons ", weapons);
+
   // const purpose = useContractReader(readContracts, "YourContract", "purpose");
   // const number = useContractReader(readContracts, "YourContract", "number");
 

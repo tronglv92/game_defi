@@ -1,13 +1,13 @@
 import { Row, Col, Card, Rate, Divider, Checkbox } from "antd";
-import icStaff from "../../public/ic-staff-small.svg";
-import icSword from "../../public/ic-sword-small.svg";
-import icBow from "../../public/ic-bow-small.svg";
+import icStaff from "../../../public/ic-staff-small.svg";
+import icSword from "../../../public/ic-sword-small.svg";
+import icBow from "../../../public/ic-bow-small.svg";
 import Image from "next/image";
-import { MARKETING_DETAIL_PATH } from "../../constants/path";
+
 
 import Link from "next/link";
-import { formatCurrency } from "../../helpers/helper";
-import { WEAPON_CLASS } from "../../constants/key";
+import { formatCurrency } from "../../../helpers/helper";
+import { WEAPON_CLASS } from "../../../constants/key";
 const ItemWeapon = props => {
   const { item, onClickProduct } = props;
 
@@ -46,7 +46,7 @@ const ItemWeapon = props => {
           </Row>
           <Row justify="center">
             <div className="w-[158px] h-[237px] bg-[url('/item-frame-bg.png')] flex justify-center">
-              <Image src={item.img} height="30" width="30" className="object-contain h-9 w-9 " />
+              <Image src={item.img} height="50" width="50" className="object-contain h-9 w-9 " />
             </div>
           </Row>
 

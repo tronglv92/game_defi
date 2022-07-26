@@ -35,9 +35,18 @@ export const weaponSlice = createSlice({
     },
 
     getWeaponById: (state, action) => {},
+    getSignatureMintWeapon: (state, action) => {},
+    updateMintWeapon: (state, action) => {},
   },
 });
 
-export const { getWeapons, getWeaponsSuccess, getWeaponsError, getWeaponById } = weaponSlice.actions;
+export const {
+  getWeapons,
+  getWeaponsSuccess,
+  getWeaponsError,
+  getWeaponById,
+  getSignatureMintWeapon,
+  updateMintWeapon,
+} = weaponSlice.actions;
 
 export default weaponSlice.reducer;

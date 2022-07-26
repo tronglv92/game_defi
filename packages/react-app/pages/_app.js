@@ -40,7 +40,7 @@ function MyApp({ Component, pageProps }) {
   }
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
-      <Web3ContextProvider network="rinkeby">
+      <Web3ContextProvider network="localhost">
         <ThemeProvider attribute="class">
           <>
             <Head>

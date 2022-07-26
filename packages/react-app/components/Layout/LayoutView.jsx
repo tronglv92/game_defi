@@ -18,6 +18,7 @@ import {
   MARKETING_PATH,
   MYSTERY_BOX_PATH,
   MY_BOXES_PATH,
+  MY_WEAPONS_PATH,
 } from "../../constants/path";
 const { Header, Content, Footer } = Layout;
 function getItem(label, key, icon, children) {
@@ -28,11 +29,12 @@ function getItem(label, key, icon, children) {
     label,
   };
 }
-const items = [getItem("Weapon", MENU_ID.Weapons), getItem("Mystery Boxes", MENU_ID.MysteryBoxes)];
+const items = [getItem("Weapons", MENU_ID.Weapons), getItem("Mystery Boxes", MENU_ID.MysteryBoxes)];
 const itemsWhenLogin = [
-  getItem("Weapon", MENU_ID.Weapons),
+  getItem("Weapons", MENU_ID.Weapons),
   getItem("Mystery Boxes", MENU_ID.MysteryBoxes),
   getItem("My Boxes", MENU_ID.MyBoxes),
+  getItem("My Weapons", MENU_ID.MyWeapons),
 ];
 function LayoutView({ children, web3 }) {
   const {
@@ -50,6 +52,7 @@ function LayoutView({ children, web3 }) {
 
   const router = useRouter();
   const [visible, setVisible] = useState(false);
+  const [selectedMenu, setSelectedMenu] = useState(MENU_ID.Weapons);
 
   const showDrawer = () => {
     setVisible(true);
@@ -71,9 +74,10 @@ function LayoutView({ children, web3 }) {
         break;
       case MENU_ID.MyBoxes:
         navigateTo(MY_BOXES_PATH);
-
         break;
-
+      case MENU_ID.MyWeapons:
+        navigateTo(MY_WEAPONS_PATH);
+        break;
       default:
         break;
     }
@@ -106,6 +110,9 @@ function LayoutView({ children, web3 }) {
         case MY_BOXES_PATH:
           selectedMenu = MENU_ID.MyBoxes;
           break;
+        case MY_WEAPONS_PATH:
+          selectedMenu = MENU_ID.MyWeapons;
+          break;
         default:
           selectedMenu = MENU_ID.Weapons;
           break;
@@ -113,8 +120,12 @@ function LayoutView({ children, web3 }) {
     }
     return selectedMenu;
   };
-
-  const selectedMenu = getSelectedMenu();
+  useEffect(() => {
+    const selectedMenu = getSelectedMenu();
+    console.log("useEffect router.asPath selectedMenu ", selectedMenu);
+    setSelectedMenu(selectedMenu);
+  }, [router.asPath]);
+  //
   const isMobile = useMediaQuery({ query: `(max-width: 768px)` });
   return (
     <>
@@ -152,7 +163,8 @@ function LayoutView({ children, web3 }) {
                 theme="dark"
                 mode="horizontal"
                 style={{ flex: 1 }}
-                defaultSelectedKeys={[selectedMenu]}
+                // defaultSelectedKeys={[selectedMenu]}
+                selectedKeys={[selectedMenu]}
                 items={yourAccount ? itemsWhenLogin : items}
                 onClick={onClickMenu}
               />
