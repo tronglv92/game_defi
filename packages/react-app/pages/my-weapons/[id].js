@@ -14,19 +14,18 @@ import Image from "next/image";
 import { WEAPON_CLASS } from "../../constants/key";
 import { LOGIN_PATH, MARKETING_PATH } from "../../constants/path";
 import { useDispatch, useSelector } from "react-redux";
-import { getSignatureMintWeapon, updateMintWeapon } from "../../store/weapon/weaponSlice";
+
 import { Web3Consumer } from "../../helpers/connectAccount/Web3Context";
-import { DECIMAL, STATE_NFT } from "../../constants/constant";
-import { BigNumber } from "ethers";
+
 function DetailMyWeapon({ web3, weapon }) {
+  console.log("weapon ", weapon);
   const { readContracts, yourAccount, writeContracts, tx } = web3;
-  const [isLoadBuyBox, setIsLoadBuyBox] = useState(false);
 
   const router = useRouter();
   const dispatch = useDispatch();
   const onPressSellWeapon = () => {
     if (yourAccount && writeContracts && readContracts) {
-    
+      
     } else {
       router.push(LOGIN_PATH);
     }
@@ -52,7 +51,7 @@ function DetailMyWeapon({ web3, weapon }) {
         {weapon ? (
           <div className="mt-8 md:mt-20 grid md:grid-cols-2 gap-10">
             <div sm={24} md={12} className="flex flex-col max-w-lg w-full mx-auto">
-              <Image className="max-w-[250px] mx-auto object-contain" src={weapon.img} height="300" width="300" />
+              <img className="max-w-[250px] mx-auto object-contain" src={weapon.img} />
               <img src="/stone-shelf.png" className="mx-auto max-w-full"></img>
               <div className="text-center mt-10">
                 <button
